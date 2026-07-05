@@ -1,17 +1,19 @@
 """
 Queue-based traffic simulator.
 
-The simulator converts generated vehicle demand into:
+The simulator converts generated vehicle and pedestrian demand into:
 - queues
 - waiting time
 - throughput
 - max queue length
+- pedestrian delay metrics
 
 It uses a simplified phase-based traffic-light model:
 - NS green means north-south traffic moves and east-west waits
 - EW green means east-west traffic moves and north-south waits
+- pedestrian crossing is modelled as an intersection-level service phase
 
-For Phase 3, we use fixed equal timing.
+For Phase 3, we use fixed equal vehicle timing.
 More advanced controllers will be added in later phases.
 """
 
@@ -30,6 +32,9 @@ from src.config import (
     ALL_RED_TIME,
     BASE_SERVICE_RATE,
     SECONDS_PER_STEP,
+    PEDESTRIAN_CROSSING_TIME,
+    PEDESTRIAN_PHASE_TRIGGER,
+    PEDESTRIAN_SERVICE_RATE,
 )
 
 
@@ -43,9 +48,16 @@ class SimulationMetrics:
     total_wait_time_seconds: float
     throughput: int
     total_arrivals: int
+    final_queue_length: int
     max_queue_length: int
     avg_queue_length: float
+
     pedestrian_total_arrivals: int
+    pedestrian_throughput: int
+    pedestrian_final_queue: int
+    pedestrian_max_queue: int
+    pedestrian_avg_queue: float
+    pedestrian_avg_wait_seconds: float
     pedestrian_total_wait_seconds: float
 
 
@@ -89,10 +101,13 @@ class QueueTrafficSimulator:
         self.total_arrivals = 0
         self.throughput = 0
         self.total_wait_time_seconds = 0.0
+
         self.max_queue_length = 0
 
         self.pedestrian_total_arrivals = 0
+        self.pedestrian_throughput = 0
         self.pedestrian_total_wait_seconds = 0.0
+        self.pedestrian_max_queue = 0
 
         self.history: List[Dict[str, float]] = []
 
@@ -136,14 +151,25 @@ class QueueTrafficSimulator:
 
         green_times = self._fixed_equal_green_times()
 
+        # Simple pedestrian phase:
+        # If pedestrian queues are high, reserve crossing time.
+        pedestrian_phase_active = self._should_activate_pedestrian_phase()
+
+        if pedestrian_phase_active:
+            self._serve_pedestrians()
+
         self._discharge_vehicles(
             step_demand=step_demand,
             green_times=green_times,
+            pedestrian_phase_active=pedestrian_phase_active,
         )
 
         self._update_wait_times()
 
-        self._record_history(time_step=time_step)
+        self._record_history(
+            time_step=time_step,
+            pedestrian_phase_active=pedestrian_phase_active,
+        )
 
     def _fixed_equal_green_times(self) -> Dict[str, float]:
         """
@@ -191,22 +217,63 @@ class QueueTrafficSimulator:
             self.pedestrian_queues[int(intersection_id)] += pedestrian_demand
             self.pedestrian_total_arrivals += pedestrian_demand
 
+    def _should_activate_pedestrian_phase(self) -> bool:
+        """
+        Decide whether to activate a pedestrian phase.
+
+        This simple rule triggers crossing when at least one intersection
+        has a pedestrian queue above a threshold.
+        """
+        return any(
+            queue >= PEDESTRIAN_PHASE_TRIGGER
+            for queue in self.pedestrian_queues.values()
+        )
+
+    def _serve_pedestrians(self) -> None:
+        """
+        Clear pedestrians during the pedestrian crossing phase.
+
+        We treat pedestrian crossing as intersection-level service.
+        """
+        pedestrian_capacity = int(
+            PEDESTRIAN_CROSSING_TIME * PEDESTRIAN_SERVICE_RATE
+        )
+
+        for intersection_id in range(self.num_intersections):
+            current_queue = self.pedestrian_queues[intersection_id]
+            pedestrians_crossed = min(current_queue, pedestrian_capacity)
+
+            self.pedestrian_queues[intersection_id] -= pedestrians_crossed
+            self.pedestrian_throughput += pedestrians_crossed
+
     def _discharge_vehicles(
         self,
         step_demand: pd.DataFrame,
         green_times: Dict[str, float],
+        pedestrian_phase_active: bool,
     ) -> None:
         """
         Release vehicles from queues based on green time and capacity.
 
         Weather and accidents reduce capacity.
+        Pedestrian phase reduces vehicle green time in this simplified model.
         """
         capacity_lookup = self._capacity_multipliers(step_demand)
+
+        pedestrian_green_penalty = (
+            PEDESTRIAN_CROSSING_TIME / len(DIRECTIONS)
+            if pedestrian_phase_active
+            else 0.0
+        )
 
         for intersection_id in range(self.num_intersections):
             for direction in DIRECTIONS:
                 queue_length = self.queues[intersection_id][direction]
-                green_time = green_times[direction]
+
+                adjusted_green_time = max(
+                    0.0,
+                    green_times[direction] - pedestrian_green_penalty,
+                )
 
                 capacity_multiplier = capacity_lookup.get(
                     (intersection_id, direction),
@@ -214,7 +281,7 @@ class QueueTrafficSimulator:
                 )
 
                 discharge_capacity = int(
-                    green_time
+                    adjusted_green_time
                     * self.service_rate
                     * capacity_multiplier
                 )
@@ -255,49 +322,87 @@ class QueueTrafficSimulator:
         """
         Approximate waiting time.
 
-        Any vehicle still in queue at the end of the minute is assumed
-        to have waited for that minute.
+        Any vehicle or pedestrian still in queue at the end of the minute
+        is assumed to have waited for that minute.
         """
-        total_queue = 0
+        total_vehicle_queue = self._total_vehicle_queue()
+        total_pedestrian_queue = self._total_pedestrian_queue()
 
-        for intersection_id in range(self.num_intersections):
-            for direction in DIRECTIONS:
-                queue_length = self.queues[intersection_id][direction]
-                total_queue += queue_length
+        self.total_wait_time_seconds += (
+            total_vehicle_queue * SECONDS_PER_STEP
+        )
 
-        self.total_wait_time_seconds += total_queue * SECONDS_PER_STEP
-
-        # For Phase 3, pedestrians accumulate wait but do not yet cross.
-        # Pedestrian crossing logic will be added later.
-        total_pedestrian_queue = sum(self.pedestrian_queues.values())
         self.pedestrian_total_wait_seconds += (
             total_pedestrian_queue * SECONDS_PER_STEP
         )
 
-    def _record_history(self, time_step: int) -> None:
+    def _record_history(
+        self,
+        time_step: int,
+        pedestrian_phase_active: bool,
+    ) -> None:
         """
         Store time-series metrics for charts and Streamlit.
         """
-        total_queue = sum(
-            self.queues[intersection_id][direction]
-            for intersection_id in range(self.num_intersections)
-            for direction in DIRECTIONS
-        )
+        total_queue = self._total_vehicle_queue()
+        pedestrian_queue = self._total_pedestrian_queue()
+
+        ns_queue = self._direction_queue("NS")
+        ew_queue = self._direction_queue("EW")
 
         self.max_queue_length = max(self.max_queue_length, total_queue)
+        self.pedestrian_max_queue = max(
+            self.pedestrian_max_queue,
+            pedestrian_queue,
+        )
 
         avg_queue_per_intersection = total_queue / self.num_intersections
+        avg_pedestrian_queue_per_intersection = (
+            pedestrian_queue / self.num_intersections
+        )
 
         self.history.append(
             {
                 "time_step": time_step,
                 "total_queue": total_queue,
+                "ns_queue": ns_queue,
+                "ew_queue": ew_queue,
                 "avg_queue_per_intersection": avg_queue_per_intersection,
                 "throughput": self.throughput,
                 "total_wait_time_seconds": self.total_wait_time_seconds,
-                "pedestrian_queue": sum(self.pedestrian_queues.values()),
+                "pedestrian_queue": pedestrian_queue,
+                "avg_pedestrian_queue_per_intersection": (
+                    avg_pedestrian_queue_per_intersection
+                ),
+                "pedestrian_throughput": self.pedestrian_throughput,
                 "pedestrian_wait_seconds": self.pedestrian_total_wait_seconds,
+                "pedestrian_phase_active": int(pedestrian_phase_active),
             }
+        )
+
+    def _total_vehicle_queue(self) -> int:
+        """
+        Total queued vehicles across all intersections and directions.
+        """
+        return sum(
+            self.queues[intersection_id][direction]
+            for intersection_id in range(self.num_intersections)
+            for direction in DIRECTIONS
+        )
+
+    def _total_pedestrian_queue(self) -> int:
+        """
+        Total queued pedestrians across all intersections.
+        """
+        return sum(self.pedestrian_queues.values())
+
+    def _direction_queue(self, direction: str) -> int:
+        """
+        Total queued vehicles for one direction across all intersections.
+        """
+        return sum(
+            self.queues[intersection_id][direction]
+            for intersection_id in range(self.num_intersections)
         )
 
     def get_metrics(self) -> SimulationMetrics:
@@ -316,14 +421,32 @@ class QueueTrafficSimulator:
             else 0.0
         )
 
+        pedestrian_avg_queue = (
+            np.mean([row["pedestrian_queue"] for row in self.history])
+            if self.history
+            else 0.0
+        )
+
+        pedestrian_avg_wait_seconds = (
+            self.pedestrian_total_wait_seconds / self.pedestrian_total_arrivals
+            if self.pedestrian_total_arrivals > 0
+            else 0.0
+        )
+
         return SimulationMetrics(
             avg_wait_time_seconds=avg_wait_time_seconds,
             total_wait_time_seconds=self.total_wait_time_seconds,
             throughput=self.throughput,
             total_arrivals=self.total_arrivals,
+            final_queue_length=self._total_vehicle_queue(),
             max_queue_length=self.max_queue_length,
             avg_queue_length=float(avg_queue_length),
             pedestrian_total_arrivals=self.pedestrian_total_arrivals,
+            pedestrian_throughput=self.pedestrian_throughput,
+            pedestrian_final_queue=self._total_pedestrian_queue(),
+            pedestrian_max_queue=self.pedestrian_max_queue,
+            pedestrian_avg_queue=float(pedestrian_avg_queue),
+            pedestrian_avg_wait_seconds=pedestrian_avg_wait_seconds,
             pedestrian_total_wait_seconds=self.pedestrian_total_wait_seconds,
         )
 

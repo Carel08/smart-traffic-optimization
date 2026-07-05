@@ -122,16 +122,38 @@ def main():
 
         col1, col2, col3, col4 = st.columns(4)
 
-        col1.metric("Avg Wait Time", f"{metrics.avg_wait_time_seconds:.1f}s")
-        col2.metric("Throughput", metrics.throughput)
-        col3.metric("Max Queue", metrics.max_queue_length)
-        col4.metric("Total Arrivals", metrics.total_arrivals)
+        col1.metric("Avg Vehicle Wait", f"{metrics.avg_wait_time_seconds:.1f}s")
+        col2.metric("Vehicle Throughput", metrics.throughput)
+        col3.metric("Max Vehicle Queue", metrics.max_queue_length)
+        col4.metric("Final Vehicle Queue", metrics.final_queue_length)
 
-        st.subheader("Queue Length Over Time")
-        st.line_chart(history, x="time_step", y="total_queue")
+        col5, col6, col7, col8 = st.columns(4)
+
+        col5.metric("Avg Ped Wait", f"{metrics.pedestrian_avg_wait_seconds:.1f}s")
+        col6.metric("Ped Throughput", metrics.pedestrian_throughput)
+        col7.metric("Max Ped Queue", metrics.pedestrian_max_queue)
+        col8.metric("Final Ped Queue", metrics.pedestrian_final_queue)
+
+        st.subheader("Vehicle Queue Over Time")
+        st.line_chart(
+            history,
+            x="time_step",
+            y=["total_queue", "ns_queue", "ew_queue"],
+        )
 
         st.subheader("Pedestrian Queue Over Time")
-        st.line_chart(history, x="time_step", y="pedestrian_queue")
+        st.line_chart(
+            history,
+            x="time_step",
+            y=["pedestrian_queue", "avg_pedestrian_queue_per_intersection"],
+        )
+
+        st.subheader("Pedestrian Phase Activation")
+        st.line_chart(
+            history,
+            x="time_step",
+            y="pedestrian_phase_active",
+        )
 
         st.subheader("Simulation History")
         st.dataframe(history.head(100), use_container_width=True)

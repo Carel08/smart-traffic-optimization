@@ -5,6 +5,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_generator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/simulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/simulator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/streamlit_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/streamlit_app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_smoke.py" afterDir="false" />
     </list>

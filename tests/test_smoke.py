@@ -45,3 +45,27 @@ def test_fixed_equal_simulation_runs():
     assert metrics.throughput >= 0
     assert metrics.avg_wait_time_seconds >= 0
     assert not history.empty
+
+def test_fixed_equal_simulation_has_pedestrian_metrics():
+    from src.data_generator import generate_traffic_demand
+    from src.simulator import run_fixed_equal_simulation
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=20,
+        scenario="pedestrian",
+    )
+
+    result = run_fixed_equal_simulation(
+        num_intersections=4,
+        demand_df=demand_df,
+    )
+
+    metrics = result["metrics"]
+    history = result["history"]
+
+    assert metrics.pedestrian_total_arrivals >= 0
+    assert metrics.pedestrian_throughput >= 0
+    assert metrics.pedestrian_avg_wait_seconds >= 0
+    assert "pedestrian_phase_active" in history.columns
+    assert "avg_pedestrian_queue_per_intersection" in history.columns

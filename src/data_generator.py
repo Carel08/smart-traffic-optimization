@@ -101,6 +101,13 @@ class TrafficDemandGenerator:
                     intersection_id
                 )
 
+                # Pedestrians are intersection-level, not direction-level.
+                # We generate once and copy the same value to NS and EW rows.
+                pedestrian_demand = self._pedestrian_demand(
+                    hour=hour,
+                    scenario=scenario,
+                )
+
                 for direction in DIRECTIONS:
                     direction_multiplier = self._direction_multiplier(
                         direction=direction,
@@ -127,10 +134,6 @@ class TrafficDemandGenerator:
 
                     vehicle_demand = self.rng.poisson(arrival_rate)
 
-                    pedestrian_demand = self._pedestrian_demand(
-                        hour=hour,
-                        scenario=scenario,
-                    )
 
                     accident_active = int(
                         accident_info["active"]

@@ -24,6 +24,9 @@ BASE_SERVICE_RATE = 1.0  # vehicles released per second during green
 # Pedestrian assumptions
 PEDESTRIAN_CROSSING_TIME = 12
 PEDESTRIAN_WAIT_THRESHOLD = 10
+PEDESTRIAN_SERVICE_RATE = 1.5  # pedestrians cleared per second during crossing
+PEDESTRIAN_PHASE_TRIGGER = 10  # queue size that triggers crossing
+
 
 # Emergency vehicle assumptions
 EMERGENCY_PRIORITY_LOOKAHEAD = 2
