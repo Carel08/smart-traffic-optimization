@@ -24,6 +24,8 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
+from src.controllers import BaseTrafficController, FixedEqualController, FixedCalibratedController
+
 
 from src.config import (
     DIRECTIONS,
@@ -32,6 +34,7 @@ from src.config import (
     ALL_RED_TIME,
     BASE_SERVICE_RATE,
     SECONDS_PER_STEP,
+    PEDESTRIAN_MIN_GAP_STEPS,
     PEDESTRIAN_CROSSING_TIME,
     PEDESTRIAN_PHASE_TRIGGER,
     PEDESTRIAN_SERVICE_RATE,
@@ -98,6 +101,11 @@ class QueueTrafficSimulator:
             for intersection_id in range(num_intersections)
         }
 
+        self.last_pedestrian_service_step: Dict[int, int] = {
+            intersection_id: -10_000
+            for intersection_id in range(num_intersections)
+        }
+
         self.total_arrivals = 0
         self.throughput = 0
         self.total_wait_time_seconds = 0.0
@@ -111,25 +119,27 @@ class QueueTrafficSimulator:
 
         self.history: List[Dict[str, float]] = []
 
-    def run_fixed_equal(self) -> Dict[str, object]:
+    def run(
+            self,
+            controller: BaseTrafficController,
+    ) -> Dict[str, object]:
         """
-        Run the simulation using equal green time for NS and EW.
+        Run the simulation using a supplied traffic-light controller.
 
-        Returns
-        -------
-        dict
-            Contains final metrics and time-series history.
+        The simulator handles queues, arrivals, service, waiting time,
+        and metrics. The controller only decides green-time allocation.
         """
         time_steps = sorted(self.demand_df["time_step"].unique())
 
         for time_step in time_steps:
             step_demand = self.demand_df[
                 self.demand_df["time_step"] == time_step
-            ]
+                ]
 
-            self.step_fixed_equal(
+            self.step(
                 time_step=time_step,
                 step_demand=step_demand,
+                controller=controller,
             )
 
         metrics = self.get_metrics()
@@ -139,37 +149,65 @@ class QueueTrafficSimulator:
             "history": pd.DataFrame(self.history),
         }
 
-    def step_fixed_equal(
-        self,
-        time_step: int,
-        step_demand: pd.DataFrame,
+    def step(
+            self,
+            time_step: int,
+            step_demand: pd.DataFrame,
+            controller: BaseTrafficController,
     ) -> None:
         """
-        Run one simulation step using fixed equal signal timing.
+        Run one simulation step using the supplied controller.
         """
         self._add_arrivals(step_demand)
 
-        green_times = self._fixed_equal_green_times()
+        simulator_state = self.get_state()
 
-        # Simple pedestrian phase:
-        # If pedestrian queues are high, reserve crossing time.
-        pedestrian_phase_active = self._should_activate_pedestrian_phase()
+        decision = controller.get_green_times(
+            time_step=time_step,
+            num_intersections=self.num_intersections,
+            step_demand=step_demand,
+            simulator_state=simulator_state,
+        )
 
-        if pedestrian_phase_active:
-            self._serve_pedestrians()
+        pedestrian_phase_by_intersection = self._pedestrian_phase_by_intersection(
+            time_step=time_step,
+        )
+
+        if any(pedestrian_phase_by_intersection.values()):
+            self._serve_pedestrians(
+                time_step=time_step,
+                pedestrian_phase_by_intersection=pedestrian_phase_by_intersection,
+            )
 
         self._discharge_vehicles(
             step_demand=step_demand,
-            green_times=green_times,
-            pedestrian_phase_active=pedestrian_phase_active,
+            green_times_by_intersection=decision.green_times,
+            pedestrian_phase_by_intersection=pedestrian_phase_by_intersection,
         )
 
         self._update_wait_times()
 
         self._record_history(
             time_step=time_step,
-            pedestrian_phase_active=pedestrian_phase_active,
+            pedestrian_phase_by_intersection=pedestrian_phase_by_intersection,
+            controller_name=decision.controller_name,
+            green_times_by_intersection=decision.green_times,
         )
+
+    def get_state(self) -> Dict:
+        """
+        Return current simulator state for controllers.
+
+        Later adaptive controllers will use this to inspect queues.
+        """
+        return {
+            "queues": self.queues,
+            "pedestrian_queues": self.pedestrian_queues,
+            "total_vehicle_queue": self._total_vehicle_queue(),
+            "total_pedestrian_queue": self._total_pedestrian_queue(),
+            "throughput": self.throughput,
+            "total_arrivals": self.total_arrivals,
+        }
 
     def _fixed_equal_green_times(self) -> Dict[str, float]:
         """
@@ -217,62 +255,86 @@ class QueueTrafficSimulator:
             self.pedestrian_queues[int(intersection_id)] += pedestrian_demand
             self.pedestrian_total_arrivals += pedestrian_demand
 
-    def _should_activate_pedestrian_phase(self) -> bool:
+    def _pedestrian_phase_by_intersection(
+            self,
+            time_step: int,
+    ) -> Dict[int, bool]:
         """
-        Decide whether to activate a pedestrian phase.
+        Decide pedestrian phase activation per intersection.
 
-        This simple rule triggers crossing when at least one intersection
-        has a pedestrian queue above a threshold.
+        This prevents one busy pedestrian crossing from reducing vehicle capacity
+        across the entire network.
         """
-        return any(
-            queue >= PEDESTRIAN_PHASE_TRIGGER
-            for queue in self.pedestrian_queues.values()
-        )
+        phase_active = {}
 
-    def _serve_pedestrians(self) -> None:
+        for intersection_id, queue in self.pedestrian_queues.items():
+            last_service_step = self.last_pedestrian_service_step[intersection_id]
+
+            enough_pedestrians_waiting = queue >= PEDESTRIAN_PHASE_TRIGGER
+
+            cooldown_passed = (
+                    time_step - last_service_step >= PEDESTRIAN_MIN_GAP_STEPS
+            )
+
+            phase_active[intersection_id] = (
+                    enough_pedestrians_waiting and cooldown_passed
+            )
+
+        return phase_active
+
+    def _serve_pedestrians(
+            self,
+            time_step: int,
+            pedestrian_phase_by_intersection: Dict[int, bool],
+    ) -> None:
         """
-        Clear pedestrians during the pedestrian crossing phase.
-
-        We treat pedestrian crossing as intersection-level service.
+        Clear pedestrians only at intersections where the pedestrian phase is active.
         """
         pedestrian_capacity = int(
             PEDESTRIAN_CROSSING_TIME * PEDESTRIAN_SERVICE_RATE
         )
 
-        for intersection_id in range(self.num_intersections):
+        for intersection_id, phase_active in pedestrian_phase_by_intersection.items():
+            if not phase_active:
+                continue
+
             current_queue = self.pedestrian_queues[intersection_id]
             pedestrians_crossed = min(current_queue, pedestrian_capacity)
 
             self.pedestrian_queues[intersection_id] -= pedestrians_crossed
             self.pedestrian_throughput += pedestrians_crossed
+            self.last_pedestrian_service_step[intersection_id] = time_step
 
     def _discharge_vehicles(
-        self,
-        step_demand: pd.DataFrame,
-        green_times: Dict[str, float],
-        pedestrian_phase_active: bool,
+            self,
+            step_demand: pd.DataFrame,
+            green_times_by_intersection: Dict[int, Dict[str, float]],
+            pedestrian_phase_by_intersection: Dict[int, bool],
     ) -> None:
         """
         Release vehicles from queues based on green time and capacity.
 
         Weather and accidents reduce capacity.
-        Pedestrian phase reduces vehicle green time in this simplified model.
+        Pedestrian phase reduces vehicle green time only at active intersections.
         """
         capacity_lookup = self._capacity_multipliers(step_demand)
 
-        pedestrian_green_penalty = (
-            PEDESTRIAN_CROSSING_TIME / len(DIRECTIONS)
-            if pedestrian_phase_active
-            else 0.0
-        )
-
         for intersection_id in range(self.num_intersections):
+            intersection_green_times = green_times_by_intersection[intersection_id]
+
+            pedestrian_green_penalty = (
+                PEDESTRIAN_CROSSING_TIME / len(DIRECTIONS)
+                if pedestrian_phase_by_intersection.get(intersection_id, False)
+                else 0.0
+            )
+
             for direction in DIRECTIONS:
                 queue_length = self.queues[intersection_id][direction]
+                green_time = intersection_green_times[direction]
 
                 adjusted_green_time = max(
                     0.0,
-                    green_times[direction] - pedestrian_green_penalty,
+                    green_time - pedestrian_green_penalty,
                 )
 
                 capacity_multiplier = capacity_lookup.get(
@@ -337,9 +399,11 @@ class QueueTrafficSimulator:
         )
 
     def _record_history(
-        self,
-        time_step: int,
-        pedestrian_phase_active: bool,
+            self,
+            time_step: int,
+            pedestrian_phase_by_intersection: Dict[int, bool],
+            controller_name: str,
+            green_times_by_intersection: Dict[int, Dict[str, float]],
     ) -> None:
         """
         Store time-series metrics for charts and Streamlit.
@@ -355,15 +419,33 @@ class QueueTrafficSimulator:
             self.pedestrian_max_queue,
             pedestrian_queue,
         )
+        pedestrian_active_intersections = sum(
+            int(active)
+            for active in pedestrian_phase_by_intersection.values()
+        )
 
         avg_queue_per_intersection = total_queue / self.num_intersections
         avg_pedestrian_queue_per_intersection = (
             pedestrian_queue / self.num_intersections
         )
+        avg_ns_green = np.mean(
+            [
+                green_times_by_intersection[i]["NS"]
+                for i in range(self.num_intersections)
+            ]
+        )
+
+        avg_ew_green = np.mean(
+            [
+                green_times_by_intersection[i]["EW"]
+                for i in range(self.num_intersections)
+            ]
+        )
 
         self.history.append(
             {
                 "time_step": time_step,
+                "controller": controller_name,
                 "total_queue": total_queue,
                 "ns_queue": ns_queue,
                 "ew_queue": ew_queue,
@@ -376,7 +458,10 @@ class QueueTrafficSimulator:
                 ),
                 "pedestrian_throughput": self.pedestrian_throughput,
                 "pedestrian_wait_seconds": self.pedestrian_total_wait_seconds,
-                "pedestrian_phase_active": int(pedestrian_phase_active),
+                "pedestrian_phase_active": int(pedestrian_active_intersections > 0),
+                "pedestrian_active_intersections": pedestrian_active_intersections,
+                "avg_ns_green": avg_ns_green,
+                "avg_ew_green": avg_ew_green,
             }
         )
 
@@ -451,16 +536,54 @@ class QueueTrafficSimulator:
         )
 
 
-def run_fixed_equal_simulation(
+def run_simulation_with_controller(
     num_intersections: int,
     demand_df: pd.DataFrame,
+    controller: BaseTrafficController,
 ) -> Dict[str, object]:
     """
-    Convenience function for Phase 3 testing.
+    Convenience function to run any controller.
     """
     simulator = QueueTrafficSimulator(
         num_intersections=num_intersections,
         demand_df=demand_df,
     )
 
-    return simulator.run_fixed_equal()
+    return simulator.run(controller=controller)
+
+
+def run_fixed_equal_simulation(
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+) -> Dict[str, object]:
+    """
+    Run fixed equal timing baseline.
+    """
+    controller = FixedEqualController()
+
+    return run_simulation_with_controller(
+        num_intersections=num_intersections,
+        demand_df=demand_df,
+        controller=controller,
+    )
+
+
+def run_fixed_calibrated_simulation(
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+) -> Dict[str, object]:
+    """
+    Run fixed calibrated timing baseline.
+
+    For now, we calibrate using the same demand data for simplicity.
+    In a production version, calibration should use historical training data.
+    """
+    controller = FixedCalibratedController(
+        calibration_demand=demand_df,
+    )
+
+    return run_simulation_with_controller(
+        num_intersections=num_intersections,
+        demand_df=demand_df,
+        controller=controller,
+    )

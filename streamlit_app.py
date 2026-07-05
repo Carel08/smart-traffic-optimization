@@ -8,7 +8,10 @@ Later, it will run the simulation and visualize results.
 import streamlit as st
 
 from src.data_generator import generate_traffic_demand
-from src.simulator import run_fixed_equal_simulation
+from src.simulator import (
+    run_fixed_equal_simulation,
+    run_fixed_calibrated_simulation,
+)
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
     MAX_NUM_INTERSECTIONS,
@@ -110,10 +113,22 @@ def main():
             scenario=scenario,
         )
 
-        result = run_fixed_equal_simulation(
-            num_intersections=num_intersections,
-            demand_df=demand_df,
-        )
+        if controller == "fixed_equal":
+            result = run_fixed_equal_simulation(
+                num_intersections=num_intersections,
+                demand_df=demand_df,
+            )
+        elif controller == "fixed_calibrated":
+            result = run_fixed_calibrated_simulation(
+                num_intersections=num_intersections,
+                demand_df=demand_df,
+            )
+        else:
+            st.warning(
+                f"Controller '{controller}' will be implemented in a later phase. "
+                "Please select fixed_equal or fixed_calibrated for now."
+            )
+            st.stop()
 
         metrics = result["metrics"]
         history = result["history"]
@@ -147,12 +162,18 @@ def main():
             x="time_step",
             y=["pedestrian_queue", "avg_pedestrian_queue_per_intersection"],
         )
+        st.subheader("Average Green Time Allocation")
+        st.line_chart(
+            history,
+            x="time_step",
+            y=["avg_ns_green", "avg_ew_green"],
+        )
 
         st.subheader("Pedestrian Phase Activation")
         st.line_chart(
             history,
             x="time_step",
-            y="pedestrian_phase_active",
+            y=["pedestrian_phase_active", "pedestrian_active_intersections"],
         )
 
         st.subheader("Simulation History")

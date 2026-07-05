@@ -8,7 +8,10 @@ For Phase 1, it only confirms that the project is wired correctly.
 import argparse
 
 from src.data_generator import generate_traffic_demand
-from src.simulator import run_fixed_equal_simulation
+from src.simulator import (
+    run_fixed_equal_simulation,
+    run_fixed_calibrated_simulation,
+)
 
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
@@ -89,7 +92,7 @@ def main():
     print(f"Controller    : {args.controller}")
     print(f"Duration      : {args.duration} minutes")
     print("=" * 50)
-    print("Phase 1 setup successful. Simulation engine will be added next.")
+    print("Project configuration loaded successfully.")
 
     if args.preview_data:
         demand_df = generate_traffic_demand(
@@ -121,16 +124,27 @@ def main():
         scenario=args.scenario,
     )
 
-    print("Running fixed equal timing simulation...")
-    result = run_fixed_equal_simulation(
-        num_intersections=args.num_intersections,
-        demand_df=demand_df,
-    )
+    if args.controller == "fixed_equal":
+        print("Running fixed equal timing simulation...")
+        result = run_fixed_equal_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+        )
+    elif args.controller == "fixed_calibrated":
+        print("Running fixed calibrated timing simulation...")
+        result = run_fixed_calibrated_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+        )
+    else:
+        raise NotImplementedError(
+            f"Controller '{args.controller}' will be implemented in a later phase."
+        )
 
     metrics = result["metrics"]
     history = result["history"]
 
-    print("\nSimulation Results: Fixed Equal Timing")
+    print(f"\nSimulation Results: {args.controller}")
     print("-" * 50)
     print(f"Total vehicle arrivals       : {metrics.total_arrivals}")
     print(f"Vehicle throughput           : {metrics.throughput}")
@@ -150,10 +164,9 @@ def main():
     print(f"Average pedestrian wait, sec : {metrics.pedestrian_avg_wait_seconds:.2f}")
     print(f"Pedestrian wait, seconds     : {metrics.pedestrian_total_wait_seconds:.2f}")
 
-    history_output_path = "outputs/fixed_equal_history.csv"
+    history_output_path = f"outputs/{args.controller}_history.csv"
     history.to_csv(history_output_path, index=False)
 
     print(f"\nSaved simulation history to {history_output_path}")
-
 if __name__ == "__main__":
     main()
