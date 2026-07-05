@@ -93,3 +93,26 @@ def test_fixed_calibrated_simulation_runs():
     assert metrics.avg_wait_time_seconds >= 0
     assert "avg_ns_green" in history.columns
     assert "avg_ew_green" in history.columns
+
+def test_train_and_evaluate_predictor_runs():
+    from src.data_generator import generate_traffic_demand
+    from src.predictor import train_and_evaluate_predictor
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=180,
+        scenario="normal",
+    )
+
+    result = train_and_evaluate_predictor(
+        demand_df=demand_df,
+        test_size=0.2,
+    )
+
+    assert "baseline_evaluation" in result
+    assert "model_evaluation" in result
+    assert "feature_importance" in result
+
+    model_eval = result["model_evaluation"]
+    assert model_eval.mae >= 0
+    assert model_eval.rmse >= 0

@@ -39,3 +39,17 @@ ALL_RED_TIME = 1
 
 # Simulation assumptions
 SECONDS_PER_STEP = 60
+
+# ML training assumptions
+DEFAULT_TRAINING_DAYS = 3
+DEFAULT_TEST_SIZE = 0.2
+
+# Random Forest assumptions
+RF_N_ESTIMATORS = 80
+RF_MAX_DEPTH = 12
+RF_MIN_SAMPLES_LEAF = 5
+RF_RANDOM_STATE = DEFAULT_RANDOM_SEED
+
+# Feature engineering assumptions
+ROLLING_WINDOW_SHORT = 3
+ROLLING_WINDOW_LONG = 5

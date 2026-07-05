@@ -8,6 +8,8 @@ For Phase 1, it only confirms that the project is wired correctly.
 import argparse
 
 from src.data_generator import generate_traffic_demand
+from src.predictor import train_and_evaluate_predictor
+from src.config import DEFAULT_TRAINING_DAYS
 from src.simulator import (
     run_fixed_equal_simulation,
     run_fixed_calibrated_simulation,
@@ -67,6 +69,19 @@ def parse_args():
         help="Preview generated synthetic traffic demand.",
     )
 
+    parser.add_argument(
+        "--train-model",
+        action="store_true",
+        help="Train and evaluate the ML traffic demand predictor.",
+    )
+
+    parser.add_argument(
+        "--training-days",
+        type=int,
+        default=DEFAULT_TRAINING_DAYS,
+        help="Number of synthetic historical days to generate for ML training.",
+    )
+
 
     return parser.parse_args()
 
@@ -116,6 +131,50 @@ def main():
         output_path = "outputs/generated_demand_preview.csv"
         demand_df.to_csv(output_path, index=False)
         print(f"\nSaved generated demand to {output_path}")
+
+    if args.train_model:
+        print("\nTraining ML demand predictor...")
+
+        training_minutes = args.training_days * 24 * 60
+
+        training_df = generate_traffic_demand(
+            num_intersections=args.num_intersections,
+            simulation_minutes=training_minutes,
+            scenario=args.scenario,
+        )
+
+        ml_result = train_and_evaluate_predictor(
+            demand_df=training_df,
+            test_size=0.2,
+        )
+
+        baseline_eval = ml_result["baseline_evaluation"]
+        model_eval = ml_result["model_evaluation"]
+        feature_importance = ml_result["feature_importance"]
+
+        print("\nML Prediction Results")
+        print("-" * 50)
+        print(
+            f"{baseline_eval.model_name:25s} "
+            f"MAE={baseline_eval.mae:.3f} "
+            f"RMSE={baseline_eval.rmse:.3f} "
+            f"R2={baseline_eval.r2:.3f}"
+        )
+        print(
+            f"{model_eval.model_name:25s} "
+            f"MAE={model_eval.mae:.3f} "
+            f"RMSE={model_eval.rmse:.3f} "
+            f"R2={model_eval.r2:.3f}"
+        )
+
+        print("\nTop 10 Feature Importances")
+        print("-" * 50)
+        print(feature_importance.head(10))
+
+        feature_importance_path = "outputs/feature_importance.csv"
+        feature_importance.to_csv(feature_importance_path, index=False)
+
+        print(f"\nSaved feature importance to {feature_importance_path}")
 
     print("\nGenerating demand for simulation...")
     demand_df = generate_traffic_demand(

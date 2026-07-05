@@ -6,8 +6,10 @@ Later, it will run the simulation and visualize results.
 """
 
 import streamlit as st
+import pandas as pd
 
 from src.data_generator import generate_traffic_demand
+from src.predictor import train_and_evaluate_predictor
 from src.simulator import (
     run_fixed_equal_simulation,
     run_fixed_calibrated_simulation,
@@ -65,6 +67,13 @@ def main():
         max_value=240,
         value=DEFAULT_SIMULATION_MINUTES,
         step=30,
+    )
+
+    training_days = st.sidebar.slider(
+        "ML training days",
+        min_value=1,
+        max_value=7,
+        value=3,
     )
 
     st.subheader("Current Configuration")
@@ -178,6 +187,80 @@ def main():
 
         st.subheader("Simulation History")
         st.dataframe(history.head(100), use_container_width=True)
+    st.divider()
+    st.subheader("ML Traffic Demand Predictor")
+
+    if st.button("Train and evaluate ML predictor"):
+        training_minutes = training_days * 24 * 60
+
+        with st.spinner("Generating training data and fitting model..."):
+            training_df = generate_traffic_demand(
+                num_intersections=num_intersections,
+                simulation_minutes=training_minutes,
+                scenario=scenario,
+            )
+
+            ml_result = train_and_evaluate_predictor(
+                demand_df=training_df,
+                test_size=0.2,
+            )
+
+        baseline_eval = ml_result["baseline_evaluation"]
+        model_eval = ml_result["model_evaluation"]
+        feature_importance = ml_result["feature_importance"]
+
+        st.subheader("Prediction Performance")
+
+        performance_df = pd.DataFrame(
+            [
+                {
+                    "model": baseline_eval.model_name,
+                    "MAE": baseline_eval.mae,
+                    "RMSE": baseline_eval.rmse,
+                    "R2": baseline_eval.r2,
+                },
+                {
+                    "model": model_eval.model_name,
+                    "MAE": model_eval.mae,
+                    "RMSE": model_eval.rmse,
+                    "R2": model_eval.r2,
+                },
+            ]
+        )
+
+        st.dataframe(performance_df, use_container_width=True)
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric(
+            "MAE Improvement",
+            f"{baseline_eval.mae - model_eval.mae:.2f}",
+        )
+
+        rmse_improvement_pct = (
+            (baseline_eval.rmse - model_eval.rmse) / baseline_eval.rmse * 100
+            if baseline_eval.rmse > 0
+            else 0.0
+        )
+
+        col2.metric(
+            "RMSE Improvement",
+            f"{rmse_improvement_pct:.1f}%",
+        )
+
+        col3.metric(
+            "Model R²",
+            f"{model_eval.r2:.3f}",
+        )
+
+        st.subheader("Top Feature Importances")
+        st.dataframe(feature_importance.head(15), use_container_width=True)
+
+        st.bar_chart(
+            feature_importance.head(10),
+            x="feature",
+            y="importance",
+        )
 
 if __name__ == "__main__":
     main()
