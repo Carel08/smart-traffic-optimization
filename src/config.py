@@ -75,3 +75,27 @@ ADAPTIVE_MIN_GREEN_GRID = [5, 8]
 # Actuated signal assumptions
 ENABLE_ACTUATED_REALLOCATION = True
 MAX_REALLOCATED_GREEN_SECONDS = 15
+
+# Genetic Algorithm assumptions
+GA_RANDOM_STATE = DEFAULT_RANDOM_SEED
+GA_POPULATION_SIZE = 24
+GA_GENERATIONS = 12
+GA_ELITE_COUNT = 4
+GA_MUTATION_RATE = 0.20
+GA_MUTATION_SCALE = 5.0
+GA_TOURNAMENT_SIZE = 3
+
+GA_MIN_GREEN = 5.0
+GA_MAX_GREEN = 45.0
+
+# Time bands used by GA timing plan controller
+GA_TIME_BANDS = [
+    ("pre_event", 0, 44),
+    ("event_period", 45, 90),
+    ("recovery", 91, 10_000),
+]
+
+# GA objective weights
+GA_FINAL_QUEUE_WEIGHT = 0.02
+GA_MAX_QUEUE_WEIGHT = 0.01
+GA_PEDESTRIAN_WAIT_WEIGHT = 0.001

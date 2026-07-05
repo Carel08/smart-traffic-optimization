@@ -548,3 +548,49 @@ class EnhancedAdaptiveController(BaseTrafficController):
             )
 
         return capacity_by_direction
+
+class GATimingPlanController(BaseTrafficController):
+    """
+    Controller using a GA-optimized timing plan.
+
+    The timing plan provides a green-time split for each:
+    - time band
+    - intersection
+
+    This is an offline black-box optimized policy.
+    """
+
+    name = "ga_timing_plan"
+
+    def __init__(self, timing_plan: Dict[str, GreenTimes]):
+        self.timing_plan = timing_plan
+
+    def get_green_times(
+        self,
+        time_step: int,
+        num_intersections: int,
+        step_demand: pd.DataFrame,
+        simulator_state: Dict | None = None,
+    ) -> ControllerDecision:
+        band_name = self._time_band_name(time_step)
+
+        if band_name not in self.timing_plan:
+            raise ValueError(f"No GA timing plan found for band: {band_name}")
+
+        green_times = self.timing_plan[band_name]
+
+        return ControllerDecision(
+            green_times=green_times,
+            controller_name=self.name,
+            allow_actuated_reallocation=True,
+        )
+
+    @staticmethod
+    def _time_band_name(time_step: int) -> str:
+        from src.config import GA_TIME_BANDS
+
+        for band_name, start_step, end_step in GA_TIME_BANDS:
+            if start_step <= time_step <= end_step:
+                return band_name
+
+        return GA_TIME_BANDS[-1][0]

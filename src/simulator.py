@@ -30,6 +30,7 @@ from src.controllers import (
     FixedCalibratedController,
     AdaptivePressureController,
     EnhancedAdaptiveController,
+    GATimingPlanController,
 )
 
 from src.config import (
@@ -710,6 +711,24 @@ def run_enhanced_adaptive_simulation(
         pedestrian_weight=pedestrian_weight,
         pressure_exponent=pressure_exponent,
         adaptive_min_green=adaptive_min_green,
+    )
+
+    return run_simulation_with_controller(
+        num_intersections=num_intersections,
+        demand_df=demand_df,
+        controller=controller,
+    )
+
+def run_ga_timing_plan_simulation(
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+    timing_plan: Dict[str, Dict[int, Dict[str, float]]],
+) -> Dict[str, object]:
+    """
+    Run GA-optimized timing plan.
+    """
+    controller = GATimingPlanController(
+        timing_plan=timing_plan,
     )
 
     return run_simulation_with_controller(

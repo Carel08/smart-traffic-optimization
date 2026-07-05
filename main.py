@@ -12,6 +12,7 @@ from src.predictor import (
     train_and_evaluate_predictor,
     add_predictions_to_demand,
 )
+from src.ga_optimizer import optimize_ga_timing_plan
 from src.benchmark import (
     run_controller_benchmark,
     tune_adaptive_controller,
@@ -24,6 +25,7 @@ from src.simulator import (
     run_fixed_calibrated_simulation,
     run_adaptive_simulation,
     run_enhanced_adaptive_simulation,
+    run_ga_timing_plan_simulation,
 )
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
@@ -109,6 +111,20 @@ def parse_args():
         "--tune-enhanced-adaptive",
         action="store_true",
         help="Tune enhanced adaptive controller weights using grid search.",
+    )
+
+    parser.add_argument(
+        "--ga-generations",
+        type=int,
+        default=12,
+        help="Number of GA generations.",
+    )
+
+    parser.add_argument(
+        "--ga-population-size",
+        type=int,
+        default=24,
+        help="GA population size.",
     )
 
     return parser.parse_args()
@@ -352,6 +368,25 @@ def main():
             num_intersections=args.num_intersections,
             demand_df=demand_df,
         )
+    elif args.controller == "ga":
+        print("Running GA black-box optimization...")
+
+        ga_result = optimize_ga_timing_plan(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            population_size=args.ga_population_size,
+            generations=args.ga_generations,
+        )
+
+        result = ga_result["best_result"]
+
+        ga_history_path = "outputs/ga_generation_history.csv"
+        ga_result["generation_history"].to_csv(ga_history_path, index=False)
+
+        print("\nGA Optimization Summary")
+        print("-" * 50)
+        print(f"Best fitness: {ga_result['best_fitness']:.2f}")
+        print(f"Saved GA generation history to {ga_history_path}")
     else:
         raise NotImplementedError(
             f"Controller '{args.controller}' will be implemented in a later phase."
