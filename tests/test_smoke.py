@@ -151,3 +151,36 @@ def test_adaptive_simulation_runs():
     assert metrics.avg_wait_time_seconds >= 0
     assert "avg_ns_green" in history.columns
     assert "avg_ew_green" in history.columns
+
+def test_controller_benchmark_runs():
+    from src.data_generator import generate_traffic_demand
+    from src.predictor import train_and_evaluate_predictor, add_predictions_to_demand
+    from src.benchmark import run_controller_benchmark
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=60,
+        scenario="normal",
+    )
+
+    ml_result = train_and_evaluate_predictor(
+        demand_df=demand_df,
+        test_size=0.2,
+    )
+
+    demand_df = add_predictions_to_demand(
+        demand_df=demand_df,
+        predictor=ml_result["predictor"],
+    )
+
+    result = run_controller_benchmark(
+        num_intersections=4,
+        demand_df=demand_df,
+    )
+
+    comparison = result["comparison"]
+
+    assert not comparison.empty
+    assert "controller" in comparison.columns
+    assert "avg_wait_seconds" in comparison.columns
+    assert comparison["controller"].nunique() >= 3

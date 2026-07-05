@@ -12,6 +12,10 @@ from src.predictor import (
     train_and_evaluate_predictor,
     add_predictions_to_demand,
 )
+from src.benchmark import (
+    run_controller_benchmark,
+    tune_adaptive_controller,
+)
 
 from src.config import DEFAULT_TRAINING_DAYS
 from src.simulator import (
@@ -86,6 +90,17 @@ def parse_args():
         help="Number of synthetic historical days to generate for ML training.",
     )
 
+    parser.add_argument(
+        "--benchmark",
+        action="store_true",
+        help="Run benchmark comparison across controllers.",
+    )
+
+    parser.add_argument(
+        "--tune-adaptive",
+        action="store_true",
+        help="Tune adaptive controller weights using grid search.",
+    )
 
     return parser.parse_args()
 
@@ -138,7 +153,14 @@ def main():
 
     ml_result = None
 
-    if args.train_model or args.controller == "adaptive":
+    needs_ml_predictions = (
+            args.train_model
+            or args.controller == "adaptive"
+            or args.benchmark
+            or args.tune_adaptive
+    )
+
+    if needs_ml_predictions:
         print("\nTraining ML demand predictor...")
 
         training_minutes = args.training_days * 24 * 60
@@ -188,13 +210,59 @@ def main():
         simulation_minutes=args.duration,
         scenario=args.scenario,
     )
-    if args.controller == "adaptive":
+    if args.controller == "adaptive" or args.benchmark or args.tune_adaptive:
         print("Adding ML predictions to simulation demand...")
         demand_df = add_predictions_to_demand(
             demand_df=demand_df,
             predictor=ml_result["predictor"],
         )
 
+    if args.benchmark:
+        print("\nRunning controller benchmark...")
+
+        benchmark_result = run_controller_benchmark(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+        )
+
+        comparison_df = benchmark_result["comparison"]
+
+        print("\nController Benchmark")
+        print("-" * 80)
+        print(comparison_df)
+
+        benchmark_path = "outputs/controller_benchmark.csv"
+        comparison_df.to_csv(benchmark_path, index=False)
+
+        print(f"\nSaved benchmark results to {benchmark_path}")
+
+        return
+
+    if args.tune_adaptive:
+        print("\nTuning adaptive controller...")
+
+        tuning_result = tune_adaptive_controller(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+        )
+
+        best_params = tuning_result["best_params"]
+        tuning_df = tuning_result["tuning_results"]
+
+        print("\nBest Adaptive Parameters")
+        print("-" * 50)
+        print(best_params)
+
+        print("\nTop 10 Adaptive Tuning Results")
+        print("-" * 80)
+        print(tuning_df.head(10))
+
+        tuning_path = "outputs/adaptive_tuning_results.csv"
+        tuning_df.to_csv(tuning_path, index=False)
+
+        print(f"\nSaved tuning results to {tuning_path}")
+
+        return
 
     if args.controller == "fixed_equal":
         print("Running fixed equal timing simulation...")

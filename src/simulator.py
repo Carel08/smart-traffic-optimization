@@ -596,11 +596,18 @@ def run_fixed_calibrated_simulation(
 def run_adaptive_simulation(
     num_intersections: int,
     demand_df: pd.DataFrame,
+    queue_weight: float = 1.0,
+    prediction_weight: float = 1.0,
+    pedestrian_weight: float = 0.15,
 ) -> Dict[str, object]:
     """
     Run adaptive pressure-based controller.
     """
-    controller = AdaptivePressureController()
+    controller = AdaptivePressureController(
+        queue_weight=queue_weight,
+        prediction_weight=prediction_weight,
+        pedestrian_weight=pedestrian_weight,
+    )
 
     return run_simulation_with_controller(
         num_intersections=num_intersections,

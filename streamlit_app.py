@@ -13,7 +13,10 @@ from src.predictor import (
     train_and_evaluate_predictor,
     add_predictions_to_demand,
 )
-
+from src.benchmark import (
+    run_controller_benchmark,
+    tune_adaptive_controller,
+)
 from src.simulator import (
     run_fixed_equal_simulation,
     run_fixed_calibrated_simulation,
@@ -291,6 +294,103 @@ def main():
             feature_importance.head(10),
             x="feature",
             y="importance",
+        )
+
+    st.divider()
+    st.subheader("Controller Benchmark")
+
+    if st.button("Run controller benchmark"):
+        training_minutes = training_days * 24 * 60
+
+        with st.spinner("Training predictor and running benchmark..."):
+            training_df = generate_traffic_demand(
+                num_intersections=num_intersections,
+                simulation_minutes=training_minutes,
+                scenario=scenario,
+            )
+
+            ml_result = train_and_evaluate_predictor(
+                demand_df=training_df,
+                test_size=0.2,
+            )
+
+            benchmark_demand_df = generate_traffic_demand(
+                num_intersections=num_intersections,
+                simulation_minutes=duration,
+                scenario=scenario,
+            )
+
+            benchmark_demand_df = add_predictions_to_demand(
+                demand_df=benchmark_demand_df,
+                predictor=ml_result["predictor"],
+            )
+
+            benchmark_result = run_controller_benchmark(
+                num_intersections=num_intersections,
+                demand_df=benchmark_demand_df,
+            )
+
+        comparison_df = benchmark_result["comparison"]
+
+        st.dataframe(comparison_df, use_container_width=True)
+
+        st.bar_chart(
+            comparison_df,
+            x="controller",
+            y="avg_wait_seconds",
+        )
+
+        st.bar_chart(
+            comparison_df,
+            x="controller",
+            y="improvement_vs_fixed_equal_pct",
+        )
+
+    st.divider()
+    st.subheader("Adaptive Controller Tuning")
+
+    if st.button("Tune adaptive controller"):
+        training_minutes = training_days * 24 * 60
+
+        with st.spinner("Training predictor and tuning adaptive controller..."):
+            training_df = generate_traffic_demand(
+                num_intersections=num_intersections,
+                simulation_minutes=training_minutes,
+                scenario=scenario,
+            )
+
+            ml_result = train_and_evaluate_predictor(
+                demand_df=training_df,
+                test_size=0.2,
+            )
+
+            tuning_demand_df = generate_traffic_demand(
+                num_intersections=num_intersections,
+                simulation_minutes=duration,
+                scenario=scenario,
+            )
+
+            tuning_demand_df = add_predictions_to_demand(
+                demand_df=tuning_demand_df,
+                predictor=ml_result["predictor"],
+            )
+
+            tuning_result = tune_adaptive_controller(
+                num_intersections=num_intersections,
+                demand_df=tuning_demand_df,
+            )
+
+        st.write("Best parameters:")
+        st.json(tuning_result["best_params"])
+
+        tuning_df = tuning_result["tuning_results"]
+
+        st.dataframe(tuning_df.head(20), use_container_width=True)
+
+        st.bar_chart(
+            tuning_df.head(10),
+            x="queue_weight",
+            y="avg_wait_seconds",
         )
 
 if __name__ == "__main__":
