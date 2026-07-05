@@ -8,7 +8,7 @@ Later, it will run the simulation and visualize results.
 import streamlit as st
 
 from src.data_generator import generate_traffic_demand
-
+from src.simulator import run_fixed_equal_simulation
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
     MAX_NUM_INTERSECTIONS,
@@ -102,6 +102,39 @@ def main():
             .reset_index()
         )
         st.line_chart(chart_data, x="time_step", y="vehicle_demand")
+
+    if st.button("Run fixed timing simulation"):
+        demand_df = generate_traffic_demand(
+            num_intersections=num_intersections,
+            simulation_minutes=duration,
+            scenario=scenario,
+        )
+
+        result = run_fixed_equal_simulation(
+            num_intersections=num_intersections,
+            demand_df=demand_df,
+        )
+
+        metrics = result["metrics"]
+        history = result["history"]
+
+        st.subheader("Fixed Equal Timing Results")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.metric("Avg Wait Time", f"{metrics.avg_wait_time_seconds:.1f}s")
+        col2.metric("Throughput", metrics.throughput)
+        col3.metric("Max Queue", metrics.max_queue_length)
+        col4.metric("Total Arrivals", metrics.total_arrivals)
+
+        st.subheader("Queue Length Over Time")
+        st.line_chart(history, x="time_step", y="total_queue")
+
+        st.subheader("Pedestrian Queue Over Time")
+        st.line_chart(history, x="time_step", y="pedestrian_queue")
+
+        st.subheader("Simulation History")
+        st.dataframe(history.head(100), use_container_width=True)
 
 if __name__ == "__main__":
     main()
