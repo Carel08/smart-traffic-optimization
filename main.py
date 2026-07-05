@@ -7,6 +7,7 @@ For Phase 1, it only confirms that the project is wired correctly.
 
 import argparse
 
+from src.data_generator import generate_traffic_demand
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
     MAX_NUM_INTERSECTIONS,
@@ -55,6 +56,13 @@ def parse_args():
         help="Simulation duration in minutes.",
     )
 
+    parser.add_argument(
+        "--preview-data",
+        action="store_true",
+        help="Preview generated synthetic traffic demand.",
+    )
+
+
     return parser.parse_args()
 
 
@@ -81,6 +89,28 @@ def main():
     print("=" * 50)
     print("Phase 1 setup successful. Simulation engine will be added next.")
 
+    if args.preview_data:
+        demand_df = generate_traffic_demand(
+            num_intersections=args.num_intersections,
+            simulation_minutes=args.duration,
+            scenario=args.scenario,
+        )
+
+        print("\nGenerated demand preview:")
+        print(demand_df.head(12))
+
+        print("\nDemand summary:")
+        summary = (
+            demand_df
+            .groupby(["intersection_id", "direction"])["vehicle_demand"]
+            .agg(["mean", "max", "sum"])
+            .reset_index()
+        )
+        print(summary)
+
+        output_path = "outputs/generated_demand_preview.csv"
+        demand_df.to_csv(output_path, index=False)
+        print(f"\nSaved generated demand to {output_path}")
 
 if __name__ == "__main__":
     main()

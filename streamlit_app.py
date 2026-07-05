@@ -7,6 +7,8 @@ Later, it will run the simulation and visualize results.
 
 import streamlit as st
 
+from src.data_generator import generate_traffic_demand
+
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
     MAX_NUM_INTERSECTIONS,
@@ -73,6 +75,33 @@ def main():
 
     st.info("Phase 1 setup successful. Simulation engine will be added next.")
 
+    if st.button("Generate traffic demand preview"):
+        demand_df = generate_traffic_demand(
+            num_intersections=num_intersections,
+            simulation_minutes=duration,
+            scenario=scenario,
+        )
+
+        st.subheader("Generated Demand Sample")
+        st.dataframe(demand_df.head(60), use_container_width=True)
+
+        st.subheader("Demand Summary by Intersection and Direction")
+        summary = (
+            demand_df
+            .groupby(["intersection_id", "direction"])["vehicle_demand"]
+            .agg(["mean", "max", "sum"])
+            .reset_index()
+        )
+        st.dataframe(summary, use_container_width=True)
+
+        st.subheader("Vehicle Demand Over Time")
+        chart_data = (
+            demand_df
+            .groupby("time_step")["vehicle_demand"]
+            .sum()
+            .reset_index()
+        )
+        st.line_chart(chart_data, x="time_step", y="vehicle_demand")
 
 if __name__ == "__main__":
     main()

@@ -27,3 +27,6 @@ PEDESTRIAN_WAIT_THRESHOLD = 10
 
 # Emergency vehicle assumptions
 EMERGENCY_PRIORITY_LOOKAHEAD = 2
+
+# Safety buffer where all directions are red between phase changes
+ALL_RED_TIME = 1
