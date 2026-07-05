@@ -336,3 +336,47 @@ def train_and_evaluate_predictor(
         "model_evaluation": model_eval,
         "feature_importance": importance_df,
     }
+
+def add_predictions_to_demand(
+    demand_df: pd.DataFrame,
+    predictor: TrafficDemandPredictor,
+) -> pd.DataFrame:
+    """
+    Add predicted_vehicle_demand to the demand dataframe.
+
+    The simulator expects predictions at:
+        time_step + intersection_id + direction
+
+    For rows where lag features are unavailable, we fall back to current
+    vehicle_demand. This keeps the simulation fully runnable.
+    """
+    demand_with_predictions = demand_df.copy()
+
+    prediction_frame = predictor.prepare_training_data(demand_df)
+
+    if prediction_frame.empty:
+        demand_with_predictions["predicted_vehicle_demand"] = (
+            demand_with_predictions["vehicle_demand"]
+        )
+        return demand_with_predictions
+
+    predictions = predictor.predict(prediction_frame)
+
+    prediction_output = prediction_frame[
+        ["time_step", "intersection_id", "direction"]
+    ].copy()
+
+    prediction_output["predicted_vehicle_demand"] = predictions
+
+    demand_with_predictions = demand_with_predictions.merge(
+        prediction_output,
+        on=["time_step", "intersection_id", "direction"],
+        how="left",
+    )
+
+    demand_with_predictions["predicted_vehicle_demand"] = (
+        demand_with_predictions["predicted_vehicle_demand"]
+        .fillna(demand_with_predictions["vehicle_demand"])
+    )
+
+    return demand_with_predictions

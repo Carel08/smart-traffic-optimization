@@ -9,10 +9,15 @@ import streamlit as st
 import pandas as pd
 
 from src.data_generator import generate_traffic_demand
-from src.predictor import train_and_evaluate_predictor
+from src.predictor import (
+    train_and_evaluate_predictor,
+    add_predictions_to_demand,
+)
+
 from src.simulator import (
     run_fixed_equal_simulation,
     run_fixed_calibrated_simulation,
+    run_adaptive_simulation,
 )
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
@@ -127,15 +132,41 @@ def main():
                 num_intersections=num_intersections,
                 demand_df=demand_df,
             )
+
         elif controller == "fixed_calibrated":
             result = run_fixed_calibrated_simulation(
                 num_intersections=num_intersections,
                 demand_df=demand_df,
             )
+
+        elif controller == "adaptive":
+            with st.spinner("Training ML predictor for adaptive controller..."):
+                training_minutes = training_days * 24 * 60
+
+                training_df = generate_traffic_demand(
+                    num_intersections=num_intersections,
+                    simulation_minutes=training_minutes,
+                    scenario=scenario,
+                )
+
+                ml_result = train_and_evaluate_predictor(
+                    demand_df=training_df,
+                    test_size=0.2,
+                )
+
+                demand_df = add_predictions_to_demand(
+                    demand_df=demand_df,
+                    predictor=ml_result["predictor"],
+                )
+
+            result = run_adaptive_simulation(
+                num_intersections=num_intersections,
+                demand_df=demand_df,
+            )
+
         else:
             st.warning(
-                f"Controller '{controller}' will be implemented in a later phase. "
-                "Please select fixed_equal or fixed_calibrated for now."
+                f"Controller '{controller}' will be implemented in a later phase."
             )
             st.stop()
 

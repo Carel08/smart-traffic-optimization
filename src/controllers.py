@@ -27,6 +27,10 @@ from src.config import (
     ALL_RED_TIME,
     MIN_GREEN,
     MAX_GREEN,
+    ADAPTIVE_QUEUE_WEIGHT,
+    ADAPTIVE_PREDICTION_WEIGHT,
+    ADAPTIVE_PEDESTRIAN_WEIGHT,
+    ADAPTIVE_EPSILON,
 )
 
 
@@ -225,3 +229,126 @@ class FixedCalibratedController(BaseTrafficController):
             green_times=green_times,
             controller_name=self.name,
         )
+
+class AdaptivePressureController(BaseTrafficController):
+    """
+    Adaptive controller using queue pressure and predicted demand.
+
+    The controller allocates green time per intersection based on:
+
+        pressure = queue_weight * current_queue
+                 + prediction_weight * predicted_demand
+
+    This is a practical max-pressure style controller.
+    """
+
+    name = "adaptive"
+
+    def __init__(
+        self,
+        queue_weight: float = ADAPTIVE_QUEUE_WEIGHT,
+        prediction_weight: float = ADAPTIVE_PREDICTION_WEIGHT,
+        pedestrian_weight: float = ADAPTIVE_PEDESTRIAN_WEIGHT,
+    ):
+        self.queue_weight = queue_weight
+        self.prediction_weight = prediction_weight
+        self.pedestrian_weight = pedestrian_weight
+
+    def get_green_times(
+        self,
+        time_step: int,
+        num_intersections: int,
+        step_demand: pd.DataFrame,
+        simulator_state: Dict | None = None,
+    ) -> ControllerDecision:
+        """
+        Return adaptive green times for each intersection.
+
+        Uses:
+        - current simulator queues
+        - predicted vehicle demand if available
+        - current demand as fallback
+        - pedestrian pressure as a small balancing term
+        """
+        if simulator_state is None:
+            simulator_state = {}
+
+        queues = simulator_state.get("queues", {})
+        pedestrian_queues = simulator_state.get("pedestrian_queues", {})
+
+        green_times = {}
+
+        for intersection_id in range(num_intersections):
+            intersection_rows = step_demand[
+                step_demand["intersection_id"] == intersection_id
+            ]
+
+            demand_by_direction = self._predicted_demand_by_direction(
+                intersection_rows
+            )
+
+            ns_queue = queues.get(intersection_id, {}).get("NS", 0)
+            ew_queue = queues.get(intersection_id, {}).get("EW", 0)
+
+            pedestrian_queue = pedestrian_queues.get(intersection_id, 0)
+
+            ns_pressure = (
+                self.queue_weight * ns_queue
+                + self.prediction_weight * demand_by_direction["NS"]
+            )
+
+            ew_pressure = (
+                self.queue_weight * ew_queue
+                + self.prediction_weight * demand_by_direction["EW"]
+            )
+
+            # Pedestrian pressure slightly reduces aggressive vehicle allocation.
+            # For Phase 6 this is intentionally light-touch; proper pedestrian
+            # optimization comes later.
+            pedestrian_penalty = self.pedestrian_weight * pedestrian_queue
+
+            ns_pressure = max(0.0, ns_pressure - pedestrian_penalty / 2)
+            ew_pressure = max(0.0, ew_pressure - pedestrian_penalty / 2)
+
+            total_pressure = ns_pressure + ew_pressure + ADAPTIVE_EPSILON
+
+            available = self.available_green_time()
+
+            ns_share = ns_pressure / total_pressure
+            ns_green = available * ns_share
+
+            green_times[intersection_id] = self._safe_two_direction_split(
+                ns_green=ns_green
+            )
+
+        return ControllerDecision(
+            green_times=green_times,
+            controller_name=self.name,
+        )
+
+    @staticmethod
+    def _predicted_demand_by_direction(
+        intersection_rows: pd.DataFrame,
+    ) -> Dict[str, float]:
+        """
+        Get predicted demand by direction.
+
+        If ML predictions exist, use predicted_vehicle_demand.
+        Otherwise, fall back to current generated vehicle_demand.
+        """
+        demand_by_direction = {
+            direction: 0.0
+            for direction in DIRECTIONS
+        }
+
+        prediction_column = (
+            "predicted_vehicle_demand"
+            if "predicted_vehicle_demand" in intersection_rows.columns
+            else "vehicle_demand"
+        )
+
+        for _, row in intersection_rows.iterrows():
+            direction = row["direction"]
+            demand_by_direction[direction] = float(row[prediction_column])
+
+        return demand_by_direction

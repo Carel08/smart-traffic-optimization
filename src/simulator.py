@@ -24,7 +24,12 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-from src.controllers import BaseTrafficController, FixedEqualController, FixedCalibratedController
+from src.controllers import (
+    BaseTrafficController,
+    FixedEqualController,
+    FixedCalibratedController,
+    AdaptivePressureController,
+)
 
 
 from src.config import (
@@ -581,6 +586,21 @@ def run_fixed_calibrated_simulation(
     controller = FixedCalibratedController(
         calibration_demand=demand_df,
     )
+
+    return run_simulation_with_controller(
+        num_intersections=num_intersections,
+        demand_df=demand_df,
+        controller=controller,
+    )
+
+def run_adaptive_simulation(
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+) -> Dict[str, object]:
+    """
+    Run adaptive pressure-based controller.
+    """
+    controller = AdaptivePressureController()
 
     return run_simulation_with_controller(
         num_intersections=num_intersections,

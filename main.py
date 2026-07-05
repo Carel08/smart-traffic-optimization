@@ -8,13 +8,17 @@ For Phase 1, it only confirms that the project is wired correctly.
 import argparse
 
 from src.data_generator import generate_traffic_demand
-from src.predictor import train_and_evaluate_predictor
+from src.predictor import (
+    train_and_evaluate_predictor,
+    add_predictions_to_demand,
+)
+
 from src.config import DEFAULT_TRAINING_DAYS
 from src.simulator import (
     run_fixed_equal_simulation,
     run_fixed_calibrated_simulation,
+    run_adaptive_simulation,
 )
-
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
     MAX_NUM_INTERSECTIONS,
@@ -132,7 +136,9 @@ def main():
         demand_df.to_csv(output_path, index=False)
         print(f"\nSaved generated demand to {output_path}")
 
-    if args.train_model:
+    ml_result = None
+
+    if args.train_model or args.controller == "adaptive":
         print("\nTraining ML demand predictor...")
 
         training_minutes = args.training_days * 24 * 60
@@ -182,6 +188,13 @@ def main():
         simulation_minutes=args.duration,
         scenario=args.scenario,
     )
+    if args.controller == "adaptive":
+        print("Adding ML predictions to simulation demand...")
+        demand_df = add_predictions_to_demand(
+            demand_df=demand_df,
+            predictor=ml_result["predictor"],
+        )
+
 
     if args.controller == "fixed_equal":
         print("Running fixed equal timing simulation...")
@@ -192,6 +205,12 @@ def main():
     elif args.controller == "fixed_calibrated":
         print("Running fixed calibrated timing simulation...")
         result = run_fixed_calibrated_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+        )
+    elif args.controller == "adaptive":
+        print("Running adaptive pressure controller simulation...")
+        result = run_adaptive_simulation(
             num_intersections=args.num_intersections,
             demand_df=demand_df,
         )
