@@ -19,11 +19,14 @@ from src.config import (
     ADAPTIVE_QUEUE_WEIGHT_GRID,
     ADAPTIVE_PREDICTION_WEIGHT_GRID,
     ADAPTIVE_PEDESTRIAN_WEIGHT_GRID,
+    ADAPTIVE_PRESSURE_EXPONENT_GRID,
+    ADAPTIVE_MIN_GREEN_GRID,
 )
 from src.simulator import (
     run_fixed_equal_simulation,
     run_fixed_calibrated_simulation,
     run_adaptive_simulation,
+    run_enhanced_adaptive_simulation,
 )
 
 
@@ -127,6 +130,20 @@ def run_controller_benchmark(
         )
     )
 
+    enhanced_adaptive_result = run_enhanced_adaptive_simulation(
+        num_intersections=num_intersections,
+        demand_df=demand_df,
+    )
+    results["enhanced_adaptive"] = enhanced_adaptive_result
+
+    rows.append(
+        metrics_to_row(
+            controller_name="enhanced_adaptive",
+            metrics=enhanced_adaptive_result["metrics"],
+            fixed_equal_avg_wait=fixed_equal_avg_wait,
+        )
+    )
+
     comparison_df = pd.DataFrame(rows)
 
     return {
@@ -201,6 +218,79 @@ def tune_adaptive_controller(
                         "pedestrian_weight": pedestrian_weight,
                     }
                     best_result = result
+
+    tuning_df = (
+        pd.DataFrame(tuning_rows)
+        .sort_values("avg_wait_seconds", ascending=True)
+        .reset_index(drop=True)
+    )
+
+    return {
+        "best_params": best_params,
+        "best_result": best_result,
+        "tuning_results": tuning_df,
+    }
+
+def tune_enhanced_adaptive_controller(
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+) -> Dict[str, object]:
+    """
+    Grid-search enhanced adaptive controller.
+
+    Objective:
+        minimize average vehicle wait time
+    """
+    tuning_rows = []
+    best_result = None
+    best_params = None
+    best_avg_wait = float("inf")
+
+    for queue_weight in ADAPTIVE_QUEUE_WEIGHT_GRID:
+        for prediction_weight in ADAPTIVE_PREDICTION_WEIGHT_GRID:
+            for pedestrian_weight in ADAPTIVE_PEDESTRIAN_WEIGHT_GRID:
+                for pressure_exponent in ADAPTIVE_PRESSURE_EXPONENT_GRID:
+                    for adaptive_min_green in ADAPTIVE_MIN_GREEN_GRID:
+                        result = run_enhanced_adaptive_simulation(
+                            num_intersections=num_intersections,
+                            demand_df=demand_df,
+                            queue_weight=queue_weight,
+                            prediction_weight=prediction_weight,
+                            pedestrian_weight=pedestrian_weight,
+                            pressure_exponent=pressure_exponent,
+                            adaptive_min_green=adaptive_min_green,
+                        )
+
+                        metrics = result["metrics"]
+
+                        row = {
+                            "queue_weight": queue_weight,
+                            "prediction_weight": prediction_weight,
+                            "pedestrian_weight": pedestrian_weight,
+                            "pressure_exponent": pressure_exponent,
+                            "adaptive_min_green": adaptive_min_green,
+                            "avg_wait_seconds": metrics.avg_wait_time_seconds,
+                            "throughput": metrics.throughput,
+                            "final_queue": metrics.final_queue_length,
+                            "max_queue": metrics.max_queue_length,
+                            "pedestrian_avg_wait_seconds": (
+                                metrics.pedestrian_avg_wait_seconds
+                            ),
+                            "pedestrian_final_queue": metrics.pedestrian_final_queue,
+                        }
+
+                        tuning_rows.append(row)
+
+                        if metrics.avg_wait_time_seconds < best_avg_wait:
+                            best_avg_wait = metrics.avg_wait_time_seconds
+                            best_params = {
+                                "queue_weight": queue_weight,
+                                "prediction_weight": prediction_weight,
+                                "pedestrian_weight": pedestrian_weight,
+                                "pressure_exponent": pressure_exponent,
+                                "adaptive_min_green": adaptive_min_green,
+                            }
+                            best_result = result
 
     tuning_df = (
         pd.DataFrame(tuning_rows)

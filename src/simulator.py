@@ -29,8 +29,8 @@ from src.controllers import (
     FixedEqualController,
     FixedCalibratedController,
     AdaptivePressureController,
+    EnhancedAdaptiveController,
 )
-
 
 from src.config import (
     DIRECTIONS,
@@ -43,6 +43,8 @@ from src.config import (
     PEDESTRIAN_CROSSING_TIME,
     PEDESTRIAN_PHASE_TRIGGER,
     PEDESTRIAN_SERVICE_RATE,
+    ENABLE_ACTUATED_REALLOCATION,
+    MAX_REALLOCATED_GREEN_SECONDS,
 )
 
 
@@ -188,6 +190,7 @@ class QueueTrafficSimulator:
             step_demand=step_demand,
             green_times_by_intersection=decision.green_times,
             pedestrian_phase_by_intersection=pedestrian_phase_by_intersection,
+            allow_actuated_reallocation=decision.allow_actuated_reallocation,
         )
 
         self._update_wait_times()
@@ -197,6 +200,7 @@ class QueueTrafficSimulator:
             pedestrian_phase_by_intersection=pedestrian_phase_by_intersection,
             controller_name=decision.controller_name,
             green_times_by_intersection=decision.green_times,
+            allow_actuated_reallocation=decision.allow_actuated_reallocation,
         )
 
     def get_state(self) -> Dict:
@@ -315,12 +319,17 @@ class QueueTrafficSimulator:
             step_demand: pd.DataFrame,
             green_times_by_intersection: Dict[int, Dict[str, float]],
             pedestrian_phase_by_intersection: Dict[int, bool],
+            allow_actuated_reallocation: bool,
     ) -> None:
         """
         Release vehicles from queues based on green time and capacity.
 
         Weather and accidents reduce capacity.
         Pedestrian phase reduces vehicle green time only at active intersections.
+
+        Actuated reallocation:
+            If one direction does not use all of its green capacity, some unused
+            green time can be transferred to the opposite direction.
         """
         capacity_lookup = self._capacity_multipliers(step_demand)
 
@@ -333,14 +342,23 @@ class QueueTrafficSimulator:
                 else 0.0
             )
 
+            adjusted_green_times = {}
+
+            for direction in DIRECTIONS:
+                adjusted_green_times[direction] = max(
+                    0.0,
+                    intersection_green_times[direction] - pedestrian_green_penalty,
+                )
+
+            if ENABLE_ACTUATED_REALLOCATION and allow_actuated_reallocation:
+                adjusted_green_times = self._apply_actuated_reallocation(
+                    intersection_id=intersection_id,
+                    adjusted_green_times=adjusted_green_times,
+                    capacity_lookup=capacity_lookup,
+                )
+
             for direction in DIRECTIONS:
                 queue_length = self.queues[intersection_id][direction]
-                green_time = intersection_green_times[direction]
-
-                adjusted_green_time = max(
-                    0.0,
-                    green_time - pedestrian_green_penalty,
-                )
 
                 capacity_multiplier = capacity_lookup.get(
                     (intersection_id, direction),
@@ -348,7 +366,7 @@ class QueueTrafficSimulator:
                 )
 
                 discharge_capacity = int(
-                    adjusted_green_time
+                    adjusted_green_times[direction]
                     * self.service_rate
                     * capacity_multiplier
                 )
@@ -357,6 +375,63 @@ class QueueTrafficSimulator:
 
                 self.queues[intersection_id][direction] -= vehicles_released
                 self.throughput += vehicles_released
+
+    def _apply_actuated_reallocation(
+            self,
+            intersection_id: int,
+            adjusted_green_times: Dict[str, float],
+            capacity_lookup: Dict[tuple, float],
+    ) -> Dict[str, float]:
+        """
+        Reallocate unused green time from a low-demand direction to a
+        high-demand direction.
+
+        This mimics actuated traffic signals that terminate a phase early
+        when demand is low.
+        """
+        updated_green_times = adjusted_green_times.copy()
+
+        unused_green_by_direction = {}
+
+        for direction in DIRECTIONS:
+            queue_length = self.queues[intersection_id][direction]
+
+            capacity_multiplier = capacity_lookup.get(
+                (intersection_id, direction),
+                1.0,
+            )
+
+            effective_service_rate = max(
+                self.service_rate * capacity_multiplier,
+                1e-6,
+            )
+
+            required_green_to_clear_queue = queue_length / effective_service_rate
+
+            unused_green = max(
+                0.0,
+                adjusted_green_times[direction] - required_green_to_clear_queue,
+            )
+
+            unused_green_by_direction[direction] = unused_green
+
+        ns_unused = unused_green_by_direction["NS"]
+        ew_unused = unused_green_by_direction["EW"]
+
+        ns_queue = self.queues[intersection_id]["NS"]
+        ew_queue = self.queues[intersection_id]["EW"]
+
+        if ns_unused > 0 and ew_queue > ns_queue:
+            transfer = min(ns_unused, MAX_REALLOCATED_GREEN_SECONDS)
+            updated_green_times["NS"] -= transfer
+            updated_green_times["EW"] += transfer
+
+        elif ew_unused > 0 and ns_queue > ew_queue:
+            transfer = min(ew_unused, MAX_REALLOCATED_GREEN_SECONDS)
+            updated_green_times["EW"] -= transfer
+            updated_green_times["NS"] += transfer
+
+        return updated_green_times
 
     def _capacity_multipliers(
         self,
@@ -409,6 +484,7 @@ class QueueTrafficSimulator:
             pedestrian_phase_by_intersection: Dict[int, bool],
             controller_name: str,
             green_times_by_intersection: Dict[int, Dict[str, float]],
+            allow_actuated_reallocation: bool,
     ) -> None:
         """
         Store time-series metrics for charts and Streamlit.
@@ -466,6 +542,7 @@ class QueueTrafficSimulator:
                 "pedestrian_phase_active": int(pedestrian_active_intersections > 0),
                 "pedestrian_active_intersections": pedestrian_active_intersections,
                 "avg_ns_green": avg_ns_green,
+                "allow_actuated_reallocation": int(allow_actuated_reallocation),
                 "avg_ew_green": avg_ew_green,
             }
         )
@@ -607,6 +684,32 @@ def run_adaptive_simulation(
         queue_weight=queue_weight,
         prediction_weight=prediction_weight,
         pedestrian_weight=pedestrian_weight,
+    )
+
+    return run_simulation_with_controller(
+        num_intersections=num_intersections,
+        demand_df=demand_df,
+        controller=controller,
+    )
+
+def run_enhanced_adaptive_simulation(
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+    queue_weight: float = 1.0,
+    prediction_weight: float = 2.0,
+    pedestrian_weight: float = 0.1,
+    pressure_exponent: float = 2.0,
+    adaptive_min_green: float = 5.0,
+) -> Dict[str, object]:
+    """
+    Run enhanced adaptive pressure-based controller.
+    """
+    controller = EnhancedAdaptiveController(
+        queue_weight=queue_weight,
+        prediction_weight=prediction_weight,
+        pedestrian_weight=pedestrian_weight,
+        pressure_exponent=pressure_exponent,
+        adaptive_min_green=adaptive_min_green,
     )
 
     return run_simulation_with_controller(

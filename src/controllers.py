@@ -3,12 +3,13 @@ Traffic signal controllers.
 
 Controllers decide how much green time each direction receives.
 
-Phase 4 includes:
+includes:
 - FixedEqualController
 - FixedCalibratedController
+- AdaptiveOptimizerController
 
 Later phases will add:
-- AdaptiveOptimizerController
+
 - GAOptimizerController
 - RLExperimentalController
 """
@@ -31,6 +32,10 @@ from src.config import (
     ADAPTIVE_PREDICTION_WEIGHT,
     ADAPTIVE_PEDESTRIAN_WEIGHT,
     ADAPTIVE_EPSILON,
+    ADAPTIVE_MIN_GREEN,
+    ADAPTIVE_MAX_GREEN,
+    ADAPTIVE_PRESSURE_EXPONENT,
+    ADAPTIVE_CAPACITY_AWARE,
 )
 
 
@@ -40,17 +45,17 @@ GreenTimes = Dict[int, Dict[str, float]]
 @dataclass
 class ControllerDecision:
     """
-    Stores green-time decisions for all intersections.
+    Stores controller decisions for one simulation step.
 
-    Example:
-    {
-        0: {"NS": 25.0, "EW": 25.0},
-        1: {"NS": 30.0, "EW": 20.0}
-    }
+    allow_actuated_reallocation:
+        If True, the simulator may reallocate unused green time within
+        the cycle. This should be enabled only for smart/actuated controllers,
+        not fixed timing baselines.
     """
 
     green_times: GreenTimes
     controller_name: str
+    allow_actuated_reallocation: bool = False
 
 
 class BaseTrafficController:
@@ -110,6 +115,38 @@ class BaseTrafficController:
             "EW": float(ew_green),
         }
 
+    @staticmethod
+    def _safe_two_direction_split_custom(
+            ns_green: float,
+            min_green: float,
+            max_green: float,
+    ) -> Dict[str, float]:
+        """
+        Convert proposed NS green time into a safe NS/EW split
+        using custom min/max green constraints.
+
+        """
+        available = BaseTrafficController.available_green_time()
+
+        feasible_max = min(max_green, available - min_green)
+
+        ns_green = max(min_green, min(ns_green, feasible_max))
+        ew_green = available - ns_green
+
+        # Safety fallback in case custom inputs are inconsistent.
+        ew_green = max(min_green, ew_green)
+
+        # Rebalance if needed.
+        total = ns_green + ew_green
+        if total > available:
+            scale = available / total
+            ns_green *= scale
+            ew_green *= scale
+
+        return {
+            "NS": float(ns_green),
+            "EW": float(ew_green),
+        }
 
 class FixedEqualController(BaseTrafficController):
     """
@@ -139,6 +176,7 @@ class FixedEqualController(BaseTrafficController):
         return ControllerDecision(
             green_times=green_times,
             controller_name=self.name,
+            allow_actuated_reallocation=False,
         )
 
 
@@ -228,6 +266,7 @@ class FixedCalibratedController(BaseTrafficController):
         return ControllerDecision(
             green_times=green_times,
             controller_name=self.name,
+            allow_actuated_reallocation=False,
         )
 
 class AdaptivePressureController(BaseTrafficController):
@@ -324,6 +363,7 @@ class AdaptivePressureController(BaseTrafficController):
         return ControllerDecision(
             green_times=green_times,
             controller_name=self.name,
+            allow_actuated_reallocation=True,
         )
 
     @staticmethod
@@ -352,3 +392,159 @@ class AdaptivePressureController(BaseTrafficController):
             demand_by_direction[direction] = float(row[prediction_column])
 
         return demand_by_direction
+
+class EnhancedAdaptiveController(BaseTrafficController):
+    """
+    Enhanced adaptive controller.
+
+    Improvements over basic AdaptivePressureController:
+    - pressure exponent for more decisive green allocation
+    - adaptive min/max green limits
+    - optional capacity-aware pressure adjustment
+
+    """
+
+    name = "enhanced_adaptive"
+
+    def __init__(
+        self,
+        queue_weight: float = ADAPTIVE_QUEUE_WEIGHT,
+        prediction_weight: float = ADAPTIVE_PREDICTION_WEIGHT,
+        pedestrian_weight: float = ADAPTIVE_PEDESTRIAN_WEIGHT,
+        pressure_exponent: float = ADAPTIVE_PRESSURE_EXPONENT,
+        adaptive_min_green: float = ADAPTIVE_MIN_GREEN,
+        adaptive_max_green: float = ADAPTIVE_MAX_GREEN,
+        capacity_aware: bool = ADAPTIVE_CAPACITY_AWARE,
+    ):
+        self.queue_weight = queue_weight
+        self.prediction_weight = prediction_weight
+        self.pedestrian_weight = pedestrian_weight
+        self.pressure_exponent = pressure_exponent
+        self.adaptive_min_green = adaptive_min_green
+        self.adaptive_max_green = adaptive_max_green
+        self.capacity_aware = capacity_aware
+
+    def get_green_times(
+        self,
+        time_step: int,
+        num_intersections: int,
+        step_demand: pd.DataFrame,
+        simulator_state: Dict | None = None,
+    ) -> ControllerDecision:
+        if simulator_state is None:
+            simulator_state = {}
+
+        queues = simulator_state.get("queues", {})
+        pedestrian_queues = simulator_state.get("pedestrian_queues", {})
+
+        green_times = {}
+
+        for intersection_id in range(num_intersections):
+            intersection_rows = step_demand[
+                step_demand["intersection_id"] == intersection_id
+            ]
+
+            demand_by_direction = self._predicted_demand_by_direction(
+                intersection_rows
+            )
+
+            capacity_by_direction = self._capacity_by_direction(
+                intersection_rows
+            )
+
+            ns_queue = queues.get(intersection_id, {}).get("NS", 0)
+            ew_queue = queues.get(intersection_id, {}).get("EW", 0)
+
+            pedestrian_queue = pedestrian_queues.get(intersection_id, 0)
+
+            ns_pressure = (
+                self.queue_weight * ns_queue
+                + self.prediction_weight * demand_by_direction["NS"]
+            )
+
+            ew_pressure = (
+                self.queue_weight * ew_queue
+                + self.prediction_weight * demand_by_direction["EW"]
+            )
+
+            # Light pedestrian penalty to avoid totally ignoring crossings.
+            pedestrian_penalty = self.pedestrian_weight * pedestrian_queue
+
+            ns_pressure = max(0.0, ns_pressure - pedestrian_penalty / 2)
+            ew_pressure = max(0.0, ew_pressure - pedestrian_penalty / 2)
+
+            if self.capacity_aware:
+                # Capacity-aware pressure:
+                ns_capacity = max(capacity_by_direction["NS"], ADAPTIVE_EPSILON)
+                ew_capacity = max(capacity_by_direction["EW"], ADAPTIVE_EPSILON)
+
+                ns_pressure = ns_pressure / ns_capacity
+                ew_pressure = ew_pressure / ew_capacity
+
+            ns_pressure = max(ns_pressure, ADAPTIVE_EPSILON)
+            ew_pressure = max(ew_pressure, ADAPTIVE_EPSILON)
+
+            ns_adjusted = ns_pressure ** self.pressure_exponent
+            ew_adjusted = ew_pressure ** self.pressure_exponent
+
+            total_adjusted_pressure = ns_adjusted + ew_adjusted
+
+            available = self.available_green_time()
+
+            ns_share = ns_adjusted / total_adjusted_pressure
+            ns_green = available * ns_share
+
+            green_times[intersection_id] = self._safe_two_direction_split_custom(
+                ns_green=ns_green,
+                min_green=self.adaptive_min_green,
+                max_green=self.adaptive_max_green,
+            )
+
+        return ControllerDecision(
+            green_times=green_times,
+            controller_name=self.name,
+            allow_actuated_reallocation=True,
+        )
+
+    @staticmethod
+    def _predicted_demand_by_direction(
+        intersection_rows: pd.DataFrame,
+    ) -> Dict[str, float]:
+        demand_by_direction = {
+            direction: 0.0
+            for direction in DIRECTIONS
+        }
+
+        prediction_column = (
+            "predicted_vehicle_demand"
+            if "predicted_vehicle_demand" in intersection_rows.columns
+            else "vehicle_demand"
+        )
+
+        for _, row in intersection_rows.iterrows():
+            direction = row["direction"]
+            demand_by_direction[direction] = float(row[prediction_column])
+
+        return demand_by_direction
+
+    @staticmethod
+    def _capacity_by_direction(
+        intersection_rows: pd.DataFrame,
+    ) -> Dict[str, float]:
+        capacity_by_direction = {
+            direction: 1.0
+            for direction in DIRECTIONS
+        }
+
+        for _, row in intersection_rows.iterrows():
+            direction = row["direction"]
+
+            weather_capacity = float(row["weather_capacity_multiplier"])
+            accident_active = int(row["accident_active"])
+            accident_capacity = 0.5 if accident_active == 1 else 1.0
+
+            capacity_by_direction[direction] = (
+                weather_capacity * accident_capacity
+            )
+
+        return capacity_by_direction

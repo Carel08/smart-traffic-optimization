@@ -15,6 +15,7 @@ from src.predictor import (
 from src.benchmark import (
     run_controller_benchmark,
     tune_adaptive_controller,
+    tune_enhanced_adaptive_controller,
 )
 
 from src.config import DEFAULT_TRAINING_DAYS
@@ -22,6 +23,7 @@ from src.simulator import (
     run_fixed_equal_simulation,
     run_fixed_calibrated_simulation,
     run_adaptive_simulation,
+    run_enhanced_adaptive_simulation,
 )
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
@@ -58,6 +60,7 @@ def parse_args():
             "fixed_equal",
             "fixed_calibrated",
             "adaptive",
+            "enhanced_adaptive",
             "ga",
             "rl_experimental",
         ],
@@ -100,6 +103,12 @@ def parse_args():
         "--tune-adaptive",
         action="store_true",
         help="Tune adaptive controller weights using grid search.",
+    )
+
+    parser.add_argument(
+        "--tune-enhanced-adaptive",
+        action="store_true",
+        help="Tune enhanced adaptive controller weights using grid search.",
     )
 
     return parser.parse_args()
@@ -155,9 +164,10 @@ def main():
 
     needs_ml_predictions = (
             args.train_model
-            or args.controller == "adaptive"
+            or args.controller in ["adaptive", "enhanced_adaptive"]
             or args.benchmark
             or args.tune_adaptive
+            or args.tune_enhanced_adaptive
     )
 
     if needs_ml_predictions:
@@ -210,7 +220,8 @@ def main():
         simulation_minutes=args.duration,
         scenario=args.scenario,
     )
-    if args.controller == "adaptive" or args.benchmark or args.tune_adaptive:
+    if (args.controller in ["adaptive", "enhanced_adaptive"] or
+            args.benchmark or args.tune_adaptive or args.tune_enhanced_adaptive):
         print("Adding ML predictions to simulation demand...")
         demand_df = add_predictions_to_demand(
             demand_df=demand_df,
@@ -255,12 +266,65 @@ def main():
 
         print("\nTop 10 Adaptive Tuning Results")
         print("-" * 80)
-        print(tuning_df.head(10))
+        display_cols = [
+            "queue_weight",
+            "prediction_weight",
+            "pedestrian_weight",
+            "pressure_exponent",
+            "adaptive_min_green",
+            "avg_wait_seconds",
+            "throughput",
+            "final_queue",
+            "max_queue",
+            "pedestrian_avg_wait_seconds",
+            "pedestrian_final_queue",
+        ]
+        print(tuning_df[display_cols].head(10).to_string(index=False))
 
         tuning_path = "outputs/adaptive_tuning_results.csv"
         tuning_df.to_csv(tuning_path, index=False)
 
         print(f"\nSaved tuning results to {tuning_path}")
+
+        return
+
+    if args.tune_enhanced_adaptive:
+        print("\nTuning enhanced adaptive controller...")
+
+        tuning_result = tune_enhanced_adaptive_controller(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+        )
+
+        best_params = tuning_result["best_params"]
+        tuning_df = tuning_result["tuning_results"]
+
+        print("\nBest Enhanced Adaptive Parameters")
+        print("-" * 50)
+        print(best_params)
+
+        print("\nTop 10 Enhanced Adaptive Tuning Results")
+        print("-" * 80)
+        display_cols = [
+            "queue_weight",
+            "prediction_weight",
+            "pedestrian_weight",
+            "pressure_exponent",
+            "adaptive_min_green",
+            "avg_wait_seconds",
+            "throughput",
+            "final_queue",
+            "max_queue",
+            "pedestrian_avg_wait_seconds",
+            "pedestrian_final_queue",
+        ]
+
+        print(tuning_df[display_cols].head(10).to_string(index=False))
+
+        tuning_path = "outputs/enhanced_adaptive_tuning_results.csv"
+        tuning_df.to_csv(tuning_path, index=False)
+
+        print(f"\nSaved enhanced tuning results to {tuning_path}")
 
         return
 
@@ -279,6 +343,12 @@ def main():
     elif args.controller == "adaptive":
         print("Running adaptive pressure controller simulation...")
         result = run_adaptive_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+        )
+    elif args.controller == "enhanced_adaptive":
+        print("Running enhanced adaptive controller simulation...")
+        result = run_enhanced_adaptive_simulation(
             num_intersections=args.num_intersections,
             demand_df=demand_df,
         )
