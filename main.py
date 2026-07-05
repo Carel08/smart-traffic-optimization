@@ -17,6 +17,7 @@ from src.benchmark import (
     run_controller_benchmark,
     tune_adaptive_controller,
     tune_enhanced_adaptive_controller,
+    run_ga_scenario_benchmark,
 )
 
 from src.config import DEFAULT_TRAINING_DAYS
@@ -27,6 +28,7 @@ from src.simulator import (
     run_enhanced_adaptive_simulation,
     run_ga_timing_plan_simulation,
 )
+from src.benchmark import run_ga_scenario_benchmark
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
     MAX_NUM_INTERSECTIONS,
@@ -127,6 +129,12 @@ def parse_args():
         help="GA population size.",
     )
 
+    parser.add_argument(
+        "--scenario-benchmark",
+        action="store_true",
+        help="Run fixed_equal vs GA across all scenarios.",
+    )
+
     return parser.parse_args()
 
 
@@ -152,6 +160,45 @@ def main():
     print(f"Duration      : {args.duration} minutes")
     print("=" * 50)
     print("Project configuration loaded successfully.")
+
+    if args.scenario_benchmark:
+        print("\nRunning multi-scenario GA benchmark...")
+
+        scenario_benchmark_result = run_ga_scenario_benchmark(
+            num_intersections=args.num_intersections,
+            duration=args.duration,
+            ga_generations=args.ga_generations,
+            ga_population_size=args.ga_population_size,
+        )
+
+        scenario_comparison = scenario_benchmark_result["comparison"]
+
+        print("\nMulti-Scenario GA Benchmark")
+        print("-" * 100)
+
+        display_cols = [
+            "scenario",
+            "fixed_equal_avg_wait_seconds",
+            "ga_avg_wait_seconds",
+            "improvement_pct",
+            "passes_20_pct_target",
+            "fixed_equal_throughput",
+            "ga_throughput",
+            "fixed_equal_final_queue",
+            "ga_final_queue",
+        ]
+
+        print(
+            scenario_comparison[display_cols]
+            .to_string(index=False)
+        )
+
+        scenario_path = "outputs/scenario_ga_benchmark.csv"
+        scenario_comparison.to_csv(scenario_path, index=False)
+
+        print(f"\nSaved scenario benchmark to {scenario_path}")
+
+        return
 
     if args.preview_data:
         demand_df = generate_traffic_demand(

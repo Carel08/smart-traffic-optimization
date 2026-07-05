@@ -90,8 +90,10 @@ GA_MAX_GREEN = 45.0
 
 # Time bands used by GA timing plan controller
 GA_TIME_BANDS = [
-    ("pre_event", 0, 44),
-    ("event_period", 45, 90),
+    ("early_rush", 0, 19),
+    ("rain_build_up", 20, 44),
+    ("event_accident_peak", 45, 75),
+    ("accident_clearance", 76, 90),
     ("recovery", 91, 10_000),
 ]
 
@@ -99,3 +101,15 @@ GA_TIME_BANDS = [
 GA_FINAL_QUEUE_WEIGHT = 0.02
 GA_MAX_QUEUE_WEIGHT = 0.01
 GA_PEDESTRIAN_WAIT_WEIGHT = 0.001
+
+# Scenario benchmark assumptions
+SCENARIO_BENCHMARK_SCENARIOS = [
+    "normal",
+    "rain",
+    "accident",
+    "pedestrian",
+    "combined",
+]
+
+SCENARIO_BENCHMARK_GA_GENERATIONS = 20
+SCENARIO_BENCHMARK_GA_POPULATION_SIZE = 32

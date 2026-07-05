@@ -201,6 +201,116 @@ def mutate(
 
     return mutated
 
+def encode_timing_plan(
+    timing_plan: Dict[str, Dict[int, Dict[str, float]]],
+    num_intersections: int,
+) -> np.ndarray:
+    """
+    Convert timing plan into chromosome.
+    """
+    genes = []
+
+    for band_name, _, _ in GA_TIME_BANDS:
+        for intersection_id in range(num_intersections):
+            genes.append(timing_plan[band_name][intersection_id]["NS"])
+
+    return np.array(genes, dtype=float)
+
+
+def build_equal_seed_chromosome(num_intersections: int) -> np.ndarray:
+    """
+    Seed chromosome using equal NS/EW green split.
+    """
+    available = BaseTrafficController.available_green_time()
+    ns_green = available / 2
+
+    size = chromosome_size(num_intersections)
+
+    return np.full(size, ns_green, dtype=float)
+
+
+def build_directional_seed_chromosome(
+    num_intersections: int,
+    ns_green: float,
+) -> np.ndarray:
+    """
+    Seed chromosome with a directional bias.
+    """
+    size = chromosome_size(num_intersections)
+
+    ns_green = float(np.clip(ns_green, GA_MIN_GREEN, GA_MAX_GREEN))
+
+    return np.full(size, ns_green, dtype=float)
+
+
+def build_calibrated_seed_chromosome(
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+) -> np.ndarray:
+    """
+    Build a demand-calibrated seed chromosome by time band.
+
+    For each band and intersection:
+        NS green = available_green * NS demand share
+    """
+    genes = []
+    available = BaseTrafficController.available_green_time()
+
+    for _, start_step, end_step in GA_TIME_BANDS:
+        band_df = demand_df[
+            (demand_df["time_step"] >= start_step)
+            & (demand_df["time_step"] <= end_step)
+        ]
+
+        for intersection_id in range(num_intersections):
+            intersection_df = band_df[
+                band_df["intersection_id"] == intersection_id
+            ]
+
+            demand_by_direction = (
+                intersection_df
+                .groupby("direction")["vehicle_demand"]
+                .mean()
+                .to_dict()
+            )
+
+            ns_demand = demand_by_direction.get("NS", 0.0)
+            ew_demand = demand_by_direction.get("EW", 0.0)
+            total_demand = ns_demand + ew_demand
+
+            if total_demand <= 0:
+                ns_green = available / 2
+            else:
+                ns_green = available * ns_demand / total_demand
+
+            ns_green = float(np.clip(ns_green, GA_MIN_GREEN, GA_MAX_GREEN))
+            genes.append(ns_green)
+
+    return np.array(genes, dtype=float)
+
+
+def seed_population(
+    population: np.ndarray,
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+) -> np.ndarray:
+    """
+    Replace a few random chromosomes with sensible seeded policies.
+    """
+    seeded_population = population.copy()
+
+    seeds = [
+        build_equal_seed_chromosome(num_intersections),
+        build_calibrated_seed_chromosome(num_intersections, demand_df),
+        build_directional_seed_chromosome(num_intersections, ns_green=35.0),
+        build_directional_seed_chromosome(num_intersections, ns_green=15.0),
+    ]
+
+    for i, seed in enumerate(seeds):
+        if i < len(seeded_population):
+            seeded_population[i] = seed
+
+    return seeded_population
 
 def optimize_ga_timing_plan(
     num_intersections: int,
@@ -221,6 +331,12 @@ def optimize_ga_timing_plan(
         population_size=population_size,
         num_intersections=num_intersections,
         rng=rng,
+    )
+
+    population = seed_population(
+        population=population,
+        num_intersections=num_intersections,
+        demand_df=demand_df,
     )
 
     best_chromosome = None

@@ -21,6 +21,9 @@ from src.config import (
     ADAPTIVE_PEDESTRIAN_WEIGHT_GRID,
     ADAPTIVE_PRESSURE_EXPONENT_GRID,
     ADAPTIVE_MIN_GREEN_GRID,
+    SCENARIO_BENCHMARK_SCENARIOS,
+    SCENARIO_BENCHMARK_GA_GENERATIONS,
+    SCENARIO_BENCHMARK_GA_POPULATION_SIZE,
 )
 from src.simulator import (
     run_fixed_equal_simulation,
@@ -29,6 +32,9 @@ from src.simulator import (
     run_enhanced_adaptive_simulation,
 )
 
+
+from src.data_generator import generate_traffic_demand
+from src.ga_optimizer import optimize_ga_timing_plan
 
 def metrics_to_row(
     controller_name: str,
@@ -302,4 +308,94 @@ def tune_enhanced_adaptive_controller(
         "best_params": best_params,
         "best_result": best_result,
         "tuning_results": tuning_df,
+    }
+
+def run_ga_scenario_benchmark(
+    num_intersections: int,
+    duration: int,
+    scenarios: list[str] | None = None,
+    ga_generations: int = SCENARIO_BENCHMARK_GA_GENERATIONS,
+    ga_population_size: int = SCENARIO_BENCHMARK_GA_POPULATION_SIZE,
+) -> Dict[str, object]:
+    """
+    Run fixed_equal vs GA across multiple scenarios.
+
+    This is used to test whether the optimized controller achieves
+    20%+ improvement under different traffic conditions.
+    """
+    if scenarios is None:
+        scenarios = SCENARIO_BENCHMARK_SCENARIOS
+
+    rows = []
+    scenario_results = {}
+
+    for scenario in scenarios:
+        print(f"\nRunning scenario benchmark: {scenario}")
+
+        demand_df = generate_traffic_demand(
+            num_intersections=num_intersections,
+            simulation_minutes=duration,
+            scenario=scenario,
+        )
+
+        fixed_result = run_fixed_equal_simulation(
+            num_intersections=num_intersections,
+            demand_df=demand_df,
+        )
+
+        fixed_metrics = fixed_result["metrics"]
+
+        ga_result = optimize_ga_timing_plan(
+            num_intersections=num_intersections,
+            demand_df=demand_df,
+            population_size=ga_population_size,
+            generations=ga_generations,
+        )
+
+        ga_metrics = ga_result["best_result"]["metrics"]
+
+        improvement_pct = (
+            (
+                fixed_metrics.avg_wait_time_seconds
+                - ga_metrics.avg_wait_time_seconds
+            )
+            / fixed_metrics.avg_wait_time_seconds
+            * 100
+            if fixed_metrics.avg_wait_time_seconds > 0
+            else 0.0
+        )
+
+        pass_20_pct = improvement_pct >= 20.0
+
+        row = {
+            "scenario": scenario,
+            "fixed_equal_avg_wait_seconds": (
+                fixed_metrics.avg_wait_time_seconds
+            ),
+            "ga_avg_wait_seconds": ga_metrics.avg_wait_time_seconds,
+            "improvement_pct": improvement_pct,
+            "passes_20_pct_target": pass_20_pct,
+            "fixed_equal_throughput": fixed_metrics.throughput,
+            "ga_throughput": ga_metrics.throughput,
+            "fixed_equal_final_queue": fixed_metrics.final_queue_length,
+            "ga_final_queue": ga_metrics.final_queue_length,
+            "ga_best_fitness": ga_result["best_fitness"],
+        }
+
+        rows.append(row)
+
+        scenario_results[scenario] = {
+            "fixed_equal": fixed_result,
+            "ga": ga_result,
+        }
+
+    comparison_df = (
+        pd.DataFrame(rows)
+        .sort_values("improvement_pct", ascending=False)
+        .reset_index(drop=True)
+    )
+
+    return {
+        "comparison": comparison_df,
+        "scenario_results": scenario_results,
     }
