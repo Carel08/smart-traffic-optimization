@@ -109,6 +109,8 @@ def evaluate_timing_plan(
     chromosome: np.ndarray,
     num_intersections: int,
     demand_df: pd.DataFrame,
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
 ) -> Tuple[float, Dict[str, object]]:
     """
     Evaluate one chromosome by running the simulator.
@@ -128,6 +130,8 @@ def evaluate_timing_plan(
         num_intersections=num_intersections,
         demand_df=demand_df,
         controller=controller,
+        scenario=scenario,
+        enable_emergency_priority=enable_emergency_priority,
     )
 
     metrics = result["metrics"]
@@ -318,6 +322,8 @@ def optimize_ga_timing_plan(
     population_size: int = GA_POPULATION_SIZE,
     generations: int = GA_GENERATIONS,
     random_state: int = GA_RANDOM_STATE,
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
 ) -> Dict[str, object]:
     """
     Run GA optimization.
@@ -354,6 +360,8 @@ def optimize_ga_timing_plan(
                 chromosome=chromosome,
                 num_intersections=num_intersections,
                 demand_df=demand_df,
+                scenario=scenario,
+                enable_emergency_priority=enable_emergency_priority,
             )
 
             fitness_values.append(fitness)

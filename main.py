@@ -491,6 +491,10 @@ def main():
     print(f"Average pedestrian queue     : {metrics.pedestrian_avg_queue:.2f}")
     print(f"Average pedestrian wait, sec : {metrics.pedestrian_avg_wait_seconds:.2f}")
     print(f"Pedestrian wait, seconds     : {metrics.pedestrian_total_wait_seconds:.2f}")
+    print(f"Pedestrian target wait, sec  : {metrics.pedestrian_target_wait_seconds:.2f}")
+    print(f"Pedestrian target met        : {metrics.pedestrian_target_met}")
+    print(f"Pedestrian max est wait, sec : {metrics.pedestrian_max_estimated_wait_seconds:.2f}")
+    print(f"Pedestrian fairness gap, sec : {metrics.pedestrian_fairness_gap_seconds:.2f}")
 
     print("\nEmergency Metrics")
     print("-" * 50)
@@ -505,5 +509,6 @@ def main():
     history.to_csv(history_output_path, index=False)
 
     print(f"\nSaved simulation history to {history_output_path}")
+
 if __name__ == "__main__":
     main()

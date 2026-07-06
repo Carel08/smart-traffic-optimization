@@ -350,6 +350,8 @@ def run_ga_scenario_benchmark(
             demand_df=demand_df,
             population_size=ga_population_size,
             generations=ga_generations,
+            scenario=scenario,
+            enable_emergency_priority=True,
         )
 
         ga_metrics = ga_result["best_result"]["metrics"]

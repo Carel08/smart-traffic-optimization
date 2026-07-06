@@ -443,6 +443,37 @@ def main():
                 "emergency_preemption_active",
             ],
         )
+    st.subheader("Pedestrian Fairness")
 
+    col1, col2, col3, col4 = st.columns(4)
+
+    col1.metric(
+        "Pedestrian Avg Wait",
+        f"{metrics.pedestrian_avg_wait_seconds:.1f}s",
+    )
+
+    col2.metric(
+        "Target Wait",
+        f"{metrics.pedestrian_target_wait_seconds:.0f}s",
+    )
+
+    col3.metric(
+        "Target Met",
+        "Yes" if metrics.pedestrian_target_met else "No",
+    )
+
+    col4.metric(
+        "Fairness Gap",
+        f"{metrics.pedestrian_fairness_gap_seconds:.1f}s",
+    )
+    if "pedestrian_max_estimated_wait_seconds" in history.columns:
+        st.line_chart(
+            history,
+            x="time_step",
+            y=[
+                "pedestrian_max_estimated_wait_seconds",
+                "pedestrian_target_wait_seconds",
+            ],
+        )
 if __name__ == "__main__":
     main()

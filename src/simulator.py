@@ -65,6 +65,10 @@ from src.config import (
     EMERGENCY_PREEMPTION_DELAY_SECONDS,
     EMERGENCY_NO_PRIORITY_BASE_DELAY_SECONDS,
     EMERGENCY_NO_PRIORITY_QUEUE_DELAY_WEIGHT,
+    ENABLE_PEDESTRIAN_FAIRNESS,
+    PEDESTRIAN_FORCE_CROSSING_QUEUE,
+    PEDESTRIAN_MAX_WAIT_SECONDS,
+    PEDESTRIAN_TARGET_AVG_WAIT_SECONDS,
 )
 
 
@@ -96,6 +100,11 @@ class SimulationMetrics:
     emergency_delay_seconds: float = 0.0
     emergency_preemptions: int = 0
     emergency_completion_step: int = -1
+
+    pedestrian_target_wait_seconds: float = 0.0
+    pedestrian_target_met: int = 0
+    pedestrian_max_estimated_wait_seconds: float = 0.0
+    pedestrian_fairness_gap_seconds: float = 0.0
 
 
 class QueueTrafficSimulator:
@@ -137,6 +146,11 @@ class QueueTrafficSimulator:
             for intersection_id in range(num_intersections)
         }
 
+        self.pedestrian_queue_age_steps: Dict[int, int] = {
+            intersection_id: 0
+            for intersection_id in range(num_intersections)
+        }
+
         self.last_pedestrian_service_step: Dict[int, int] = {
             intersection_id: -10_000
             for intersection_id in range(num_intersections)
@@ -152,6 +166,7 @@ class QueueTrafficSimulator:
         self.pedestrian_throughput = 0
         self.pedestrian_total_wait_seconds = 0.0
         self.pedestrian_max_queue = 0
+        self.pedestrian_max_estimated_wait_seconds_observed = 0.0
 
         self.history: List[Dict[str, float]] = []
 
@@ -307,6 +322,11 @@ class QueueTrafficSimulator:
 
             self.queues[intersection_id][direction] += vehicle_demand
             self.total_arrivals += vehicle_demand
+            for intersection_id in range(self.num_intersections):
+                if self.pedestrian_queues[intersection_id] > 0:
+                    self.pedestrian_queue_age_steps[intersection_id] += 1
+                else:
+                    self.pedestrian_queue_age_steps[intersection_id] = 0
 
         # Pedestrians are intersection-level, not direction-level.
         # Since demand_df has one row per direction, we avoid double-counting
@@ -329,23 +349,69 @@ class QueueTrafficSimulator:
         """
         Decide pedestrian phase activation per intersection.
 
-        This prevents one busy pedestrian crossing from reducing vehicle capacity
-        across the entire network.
+        The base rule triggers when pedestrian queues exceed a normal threshold.
+        The fairness rule forces service if either:
+        - queue becomes very large
+        - oldest pedestrians have waited too long
+
+        This prevents pedestrian starvation under vehicle-heavy scenarios.
         """
         phase_active = {}
 
         for intersection_id, queue in self.pedestrian_queues.items():
             last_service_step = self.last_pedestrian_service_step[intersection_id]
 
-            enough_pedestrians_waiting = queue >= PEDESTRIAN_PHASE_TRIGGER
+            steps_since_service = time_step - last_service_step
 
-            cooldown_passed = (
-                    time_step - last_service_step >= PEDESTRIAN_MIN_GAP_STEPS
+            cooldown_passed = steps_since_service >= PEDESTRIAN_MIN_GAP_STEPS
+
+            normal_trigger = (
+                    queue >= PEDESTRIAN_PHASE_TRIGGER
+                    and cooldown_passed
+            )
+
+            estimated_oldest_wait_seconds = (
+                    self.pedestrian_queue_age_steps[intersection_id]
+                    * SECONDS_PER_STEP
+            )
+
+            force_by_queue = (
+                    ENABLE_PEDESTRIAN_FAIRNESS
+                    and queue >= PEDESTRIAN_FORCE_CROSSING_QUEUE
+            )
+
+            force_by_wait = (
+                    ENABLE_PEDESTRIAN_FAIRNESS
+                    and estimated_oldest_wait_seconds >= PEDESTRIAN_MAX_WAIT_SECONDS
             )
 
             phase_active[intersection_id] = (
-                    enough_pedestrians_waiting and cooldown_passed
+                    normal_trigger
+                    or force_by_queue
+                    or force_by_wait
             )
+
+            if phase_active[intersection_id]:
+                trigger_reason = "normal"
+
+                if force_by_queue:
+                    trigger_reason = "large pedestrian queue"
+
+                if force_by_wait:
+                    trigger_reason = "max pedestrian wait exceeded"
+
+                self.event_logger.log(
+                    time_step=time_step,
+                    event_type="pedestrian_phase",
+                    message=(
+                        f"Pedestrian phase activated at intersection "
+                        f"{intersection_id}. Reason: {trigger_reason}. "
+                        f"Queue: {queue}, estimated oldest wait: "
+                        f"{estimated_oldest_wait_seconds:.0f}s."
+                    ),
+                    severity="info",
+                    dedupe_key=f"pedestrian_phase_{time_step}_{intersection_id}",
+                )
 
         return phase_active
 
@@ -371,6 +437,15 @@ class QueueTrafficSimulator:
             self.pedestrian_queues[intersection_id] -= pedestrians_crossed
             self.pedestrian_throughput += pedestrians_crossed
             self.last_pedestrian_service_step[intersection_id] = time_step
+
+            if self.pedestrian_queues[intersection_id] == 0:
+                self.pedestrian_queue_age_steps[intersection_id] = 0
+            else:
+                # Some pedestrians remain, so the oldest wait continues.
+                self.pedestrian_queue_age_steps[intersection_id] = max(
+                    1,
+                    self.pedestrian_queue_age_steps[intersection_id],
+                )
 
     def _discharge_vehicles(
             self,
@@ -559,6 +634,7 @@ class QueueTrafficSimulator:
             self.pedestrian_max_queue,
             pedestrian_queue,
         )
+
         pedestrian_active_intersections = sum(
             int(active)
             for active in pedestrian_phase_by_intersection.values()
@@ -588,6 +664,18 @@ class QueueTrafficSimulator:
                 "emergency_current_intersection": -1,
             }
 
+        pedestrian_max_estimated_wait_seconds = (
+            max(self.pedestrian_queue_age_steps.values())
+            * SECONDS_PER_STEP
+            if self.pedestrian_queue_age_steps
+            else 0.0
+        )
+
+        self.pedestrian_max_estimated_wait_seconds_observed = max(
+            self.pedestrian_max_estimated_wait_seconds_observed,
+            pedestrian_max_estimated_wait_seconds,
+        )
+
         self.history.append(
             {
                 "time_step": time_step,
@@ -614,6 +702,10 @@ class QueueTrafficSimulator:
                 "emergency_current_intersection": emergency_info["emergency_current_intersection"],
                 "emergency_delay_seconds": self.emergency_delay_seconds,
                 "emergency_preemptions": self.emergency_preemptions,
+                "pedestrian_max_estimated_wait_seconds": (
+                    pedestrian_max_estimated_wait_seconds
+                ),
+                "pedestrian_target_wait_seconds": PEDESTRIAN_TARGET_AVG_WAIT_SECONDS,
             }
         )
 
@@ -669,6 +761,18 @@ class QueueTrafficSimulator:
             if self.pedestrian_total_arrivals > 0
             else 0.0
         )
+        pedestrian_max_estimated_wait_seconds = (
+            self.pedestrian_max_estimated_wait_seconds_observed
+        )
+
+        pedestrian_fairness_gap_seconds = max(
+            0.0,
+            pedestrian_avg_wait_seconds - PEDESTRIAN_TARGET_AVG_WAIT_SECONDS,
+        )
+
+        pedestrian_target_met = int(
+            pedestrian_avg_wait_seconds <= PEDESTRIAN_TARGET_AVG_WAIT_SECONDS
+        )
 
         return SimulationMetrics(
             avg_wait_time_seconds=avg_wait_time_seconds,
@@ -695,6 +799,10 @@ class QueueTrafficSimulator:
             emergency_delay_seconds=self.emergency_delay_seconds,
             emergency_preemptions=self.emergency_preemptions,
             emergency_completion_step=self.emergency_completion_step,
+            pedestrian_target_wait_seconds=PEDESTRIAN_TARGET_AVG_WAIT_SECONDS,
+            pedestrian_target_met=pedestrian_target_met,
+            pedestrian_max_estimated_wait_seconds=pedestrian_max_estimated_wait_seconds,
+            pedestrian_fairness_gap_seconds=pedestrian_fairness_gap_seconds,
         )
 
     def get_event_log(self) -> pd.DataFrame:
