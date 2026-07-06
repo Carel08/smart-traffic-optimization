@@ -63,6 +63,7 @@ def parse_args():
             "pedestrian",
             "emergency",
             "combined",
+            "combined_emergency",
         ],
         help="Traffic scenario to simulate.",
     )

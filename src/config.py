@@ -128,9 +128,6 @@ SCENARIO_BENCHMARK_SCENARIOS = [
 SCENARIO_BENCHMARK_GA_GENERATIONS = 20
 SCENARIO_BENCHMARK_GA_POPULATION_SIZE = 32
 
-# Emergency routing assumptions
-EMERGENCY_SCENARIOS = ["emergency"]
-
 EMERGENCY_DISPATCH_STEP = 35
 EMERGENCY_ORIGIN_INTERSECTION = 0
 
@@ -163,3 +160,24 @@ MPC_IMBALANCE_WEIGHT = 0.10
 MPC_PREDICTION_WEIGHT = 1.0
 
 MPC_OPTIMIZER_XTOL = 0.10
+
+# Scenarios
+COMBINED_SCENARIOS = [
+    "combined",
+    "combined_emergency",
+]
+
+EMERGENCY_SCENARIOS = [
+    "emergency",
+    "combined_emergency",
+]
+
+SCENARIOS = [
+    "normal",
+    "rain",
+    "accident",
+    "pedestrian",
+    "emergency",
+    "combined",
+    "combined_emergency",
+]

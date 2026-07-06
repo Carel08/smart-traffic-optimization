@@ -24,8 +24,7 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from src.config import DIRECTIONS, DEFAULT_RANDOM_SEED
-
+from src.config import DIRECTIONS, DEFAULT_RANDOM_SEED,COMBINED_SCENARIOS
 
 @dataclass
 class WeatherState:
@@ -245,7 +244,7 @@ class TrafficDemandGenerator:
         - road capacity
         - accident risk
         """
-        if scenario in ["rain", "combined"]:
+        if scenario == "rain" or scenario in COMBINED_SCENARIOS:
             # Force rain during the middle part of the demo.
             if 20 <= time_step <= 80:
                 return WeatherState(
@@ -293,7 +292,7 @@ class TrafficDemandGenerator:
 
         This gives the model something non-smooth to react to.
         """
-        if scenario in ["combined"]:
+        if scenario in COMBINED_SCENARIOS:
             if 45 <= time_step <= 75:
                 return 1.5
 
@@ -307,7 +306,7 @@ class TrafficDemandGenerator:
         """
         base_rate = 1.0
 
-        if scenario in ["pedestrian", "combined"]:
+        if scenario == "pedestrian" or scenario in COMBINED_SCENARIOS:
             base_rate = 3.0
 
         if 7 <= hour <= 9:
@@ -328,7 +327,7 @@ class TrafficDemandGenerator:
         Later we can add stochastic accident generation, but deterministic
         scenarios are better for live demos because they are reproducible.
         """
-        if scenario in ["accident", "combined"]:
+        if scenario == "accident" or scenario in COMBINED_SCENARIOS:
             if 50 <= time_step <= 90:
                 return {
                     "active": True,

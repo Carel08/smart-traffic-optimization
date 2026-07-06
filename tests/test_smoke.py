@@ -251,3 +251,123 @@ def test_scipy_mpc_simulation_runs():
     assert metrics.avg_wait_time_seconds >= 0
     assert "avg_ns_green" in history.columns
     assert "avg_ew_green" in history.columns
+
+def test_accident_event_log_records_accident():
+    from src.data_generator import generate_traffic_demand
+    from src.simulator import run_fixed_equal_simulation
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=100,
+        scenario="accident",
+    )
+
+    result = run_fixed_equal_simulation(
+        num_intersections=4,
+        demand_df=demand_df,
+        scenario="accident",
+    )
+
+    event_log = result["event_log"]
+
+    assert not event_log.empty
+    assert (
+        event_log["event_type"]
+        .astype(str)
+        .str.contains("accident")
+        .any()
+    )
+
+def test_rain_event_log_records_weather_change():
+    from src.data_generator import generate_traffic_demand
+    from src.simulator import run_fixed_equal_simulation
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=100,
+        scenario="rain",
+    )
+
+    result = run_fixed_equal_simulation(
+        num_intersections=4,
+        demand_df=demand_df,
+        scenario="rain",
+    )
+
+    event_log = result["event_log"]
+
+    assert not event_log.empty
+    assert (
+        event_log["event_type"]
+        .astype(str)
+        .str.contains("weather")
+        .any()
+    )
+
+def test_combined_emergency_dispatches_emergency():
+    from src.data_generator import generate_traffic_demand
+    from src.simulator import run_adaptive_simulation
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=100,
+        scenario="combined_emergency",
+    )
+
+    result = run_adaptive_simulation(
+        num_intersections=4,
+        demand_df=demand_df,
+        scenario="combined_emergency",
+        enable_emergency_priority=True,
+    )
+
+    metrics = result["metrics"]
+    event_log = result["event_log"]
+
+    assert metrics.emergency_dispatched == 1
+    assert not event_log.empty
+    assert (
+        event_log["event_type"]
+        .astype(str)
+        .str.contains("emergency")
+        .any()
+    )
+    
+def test_intersection_history_available_for_replay():
+    from src.data_generator import generate_traffic_demand
+    from src.simulator import run_fixed_equal_simulation
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=30,
+        scenario="normal",
+    )
+
+    result = run_fixed_equal_simulation(
+        num_intersections=4,
+        demand_df=demand_df,
+        scenario="normal",
+    )
+
+    assert "intersection_history" in result
+
+    intersection_history = result["intersection_history"]
+
+    assert not intersection_history.empty
+
+    expected_columns = {
+        "time_step",
+        "intersection_id",
+        "ns_queue",
+        "ew_queue",
+        "total_queue",
+        "pedestrian_queue",
+        "ns_green",
+        "ew_green",
+        "green_direction",
+        "pedestrian_phase_active",
+    }
+
+    assert expected_columns.issubset(set(intersection_history.columns))
+
+    assert intersection_history["intersection_id"].nunique() == 4

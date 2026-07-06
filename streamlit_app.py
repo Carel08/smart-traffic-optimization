@@ -1,33 +1,721 @@
 """
-Streamlit demo for Smart City Traffic Light Optimization.
-
+The dashboard shows:
+- demand preview
+- single-controller simulation
+- ML predictor diagnostics
+- benchmark / final report
+- pedestrian fairness, emergency preemption, and event log views
 """
 
-import streamlit as st
+from __future__ import annotations
+
+from typing import Any, Dict, Optional
+
 import pandas as pd
+import math
+import time
+
+import plotly.graph_objects as go
+import streamlit as st
+
+try:
+    import plotly.express as px
+except Exception:  # pragma: no cover - fallback for minimal installs
+    px = None
 
 from src.data_generator import generate_traffic_demand
-from src.predictor import (
-    train_and_evaluate_predictor,
-    add_predictions_to_demand,
-)
-from src.benchmark import (
-    run_controller_benchmark,
-    tune_adaptive_controller,
-)
+from src.predictor import train_and_evaluate_predictor, add_predictions_to_demand
 from src.simulator import (
     run_fixed_equal_simulation,
     run_fixed_calibrated_simulation,
     run_adaptive_simulation,
 )
+
+# Optional controllers added in later phases. The dashboard degrades gracefully
+# if a local branch does not yet have one of these helpers.
+try:
+    from src.simulator import run_scipy_mpc_simulation
+except Exception:  # pragma: no cover
+    run_scipy_mpc_simulation = None
+
+try:
+    from src.simulator import run_enhanced_adaptive_simulation
+except Exception:  # pragma: no cover
+    run_enhanced_adaptive_simulation = None
+
+try:
+    from src.ga_optimizer import optimize_ga_timing_plan
+except Exception:  # pragma: no cover
+    optimize_ga_timing_plan = None
+
+try:
+    from src.benchmark import tune_adaptive_controller
+except Exception:  # pragma: no cover
+    tune_adaptive_controller = None
+
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
     MAX_NUM_INTERSECTIONS,
     DEFAULT_SIMULATION_MINUTES,
+    SCENARIOS,
 )
 
 
-def main():
+
+CONTROLLERS = [
+    "fixed_equal",
+    "fixed_calibrated",
+    "adaptive",
+    "scipy_mpc",
+    "ga",
+]
+
+if run_enhanced_adaptive_simulation is not None:
+    CONTROLLERS.insert(4, "enhanced_adaptive")
+
+
+# -----------------------------------------------------------------------------
+# Utility helpers
+# -----------------------------------------------------------------------------
+
+
+def metric_value(metrics: Any, attr: str, default: Any = 0) -> Any:
+    return getattr(metrics, attr, default)
+
+
+def format_pct(value: float) -> str:
+    return f"{value:.2f}%"
+
+
+def calculate_improvement(baseline_wait: float, model_wait: float) -> float:
+    if baseline_wait <= 0:
+        return 0.0
+    return (baseline_wait - model_wait) / baseline_wait * 100
+
+
+def generate_demand(num_intersections: int, duration: int, scenario: str) -> pd.DataFrame:
+    return generate_traffic_demand(
+        num_intersections=num_intersections,
+        simulation_minutes=duration,
+        scenario=scenario,
+    )
+
+
+def train_predictor(
+    num_intersections: int,
+    training_days: int,
+    scenario: str,
+) -> Dict[str, Any]:
+    training_minutes = training_days * 24 * 60
+    training_df = generate_traffic_demand(
+        num_intersections=num_intersections,
+        simulation_minutes=training_minutes,
+        scenario=scenario,
+    )
+    return train_and_evaluate_predictor(demand_df=training_df, test_size=0.2)
+
+
+def add_ml_predictions_if_needed(
+    demand_df: pd.DataFrame,
+    controller: str,
+    num_intersections: int,
+    training_days: int,
+    scenario: str,
+) -> tuple[pd.DataFrame, Optional[Dict[str, Any]]]:
+    needs_predictions = controller in {"adaptive", "enhanced_adaptive", "scipy_mpc"}
+
+    if not needs_predictions:
+        return demand_df, None
+
+    ml_result = train_predictor(
+        num_intersections=num_intersections,
+        training_days=training_days,
+        scenario=scenario,
+    )
+
+    demand_with_predictions = add_predictions_to_demand(
+        demand_df=demand_df,
+        predictor=ml_result["predictor"],
+    )
+
+    return demand_with_predictions, ml_result
+
+
+def run_controller(
+    controller: str,
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+    scenario: str,
+    enable_emergency_priority: bool,
+    training_days: int,
+    ga_generations: int,
+    ga_population_size: int,
+) -> Dict[str, Any]:
+    """Run one selected controller and return simulator result."""
+    demand_for_run, ml_result = add_ml_predictions_if_needed(
+        demand_df=demand_df,
+        controller=controller,
+        num_intersections=num_intersections,
+        training_days=training_days,
+        scenario=scenario,
+    )
+
+    if controller == "fixed_equal":
+        result = run_fixed_equal_simulation(
+            num_intersections=num_intersections,
+            demand_df=demand_for_run,
+            scenario=scenario,
+            enable_emergency_priority=enable_emergency_priority,
+        )
+
+    elif controller == "fixed_calibrated":
+        result = run_fixed_calibrated_simulation(
+            num_intersections=num_intersections,
+            demand_df=demand_for_run,
+            scenario=scenario,
+            enable_emergency_priority=enable_emergency_priority,
+        )
+
+    elif controller == "adaptive":
+        result = run_adaptive_simulation(
+            num_intersections=num_intersections,
+            demand_df=demand_for_run,
+            scenario=scenario,
+            enable_emergency_priority=enable_emergency_priority,
+        )
+
+    elif controller == "scipy_mpc":
+        if run_scipy_mpc_simulation is None:
+            raise NotImplementedError("run_scipy_mpc_simulation is not available in this branch.")
+        result = run_scipy_mpc_simulation(
+            num_intersections=num_intersections,
+            demand_df=demand_for_run,
+            scenario=scenario,
+            enable_emergency_priority=enable_emergency_priority,
+        )
+
+    elif controller == "enhanced_adaptive":
+        if run_enhanced_adaptive_simulation is None:
+            raise NotImplementedError("run_enhanced_adaptive_simulation is not available in this branch.")
+        result = run_enhanced_adaptive_simulation(
+            num_intersections=num_intersections,
+            demand_df=demand_for_run,
+            scenario=scenario,
+            enable_emergency_priority=enable_emergency_priority,
+        )
+
+    elif controller == "ga":
+        if optimize_ga_timing_plan is None:
+            raise NotImplementedError("optimize_ga_timing_plan is not available in this branch.")
+        ga_result = optimize_ga_timing_plan(
+            num_intersections=num_intersections,
+            demand_df=demand_for_run,
+            population_size=ga_population_size,
+            generations=ga_generations,
+        )
+        result = ga_result["best_result"]
+        result["ga_generation_history"] = ga_result.get("generation_history")
+        result["ga_best_fitness"] = ga_result.get("best_fitness")
+
+    else:
+        raise NotImplementedError(f"Controller '{controller}' is not supported yet.")
+
+    result["ml_result"] = ml_result
+    result["controller_name"] = controller
+    return result
+
+
+def build_summary_table(results: Dict[str, Dict[str, Any]]) -> pd.DataFrame:
+    baseline_wait = results["fixed_equal"]["metrics"].avg_wait_time_seconds
+    rows = []
+
+    for controller_name, result in results.items():
+        metrics = result["metrics"]
+        rows.append(
+            {
+                "controller": controller_name,
+                "avg_wait_seconds": metrics.avg_wait_time_seconds,
+                "throughput": metrics.throughput,
+                "final_queue": metrics.final_queue_length,
+                "max_queue": metrics.max_queue_length,
+                "avg_queue": metrics.avg_queue_length,
+                "pedestrian_avg_wait_seconds": metrics.pedestrian_avg_wait_seconds,
+                "pedestrian_target_met": metric_value(metrics, "pedestrian_target_met", 0),
+                "emergency_delay_seconds": metric_value(metrics, "emergency_delay_seconds", 0.0),
+                "improvement_vs_fixed_equal_pct": calculate_improvement(
+                    baseline_wait=baseline_wait,
+                    model_wait=metrics.avg_wait_time_seconds,
+                ),
+            }
+        )
+
+    return pd.DataFrame(rows).sort_values("avg_wait_seconds").reset_index(drop=True)
+
+
+def run_final_report(
+    num_intersections: int,
+    duration: int,
+    scenario: str,
+    training_days: int,
+    enable_emergency_priority: bool,
+    ga_generations: int,
+    ga_population_size: int,
+) -> tuple[pd.DataFrame, Dict[str, Dict[str, Any]]]:
+    demand_df = generate_demand(num_intersections, duration, scenario)
+
+    controllers = ["fixed_equal", "fixed_calibrated", "adaptive"]
+    if run_scipy_mpc_simulation is not None:
+        controllers.append("scipy_mpc")
+    if optimize_ga_timing_plan is not None:
+        controllers.append("ga")
+
+    results = {}
+    for controller in controllers:
+        results[controller] = run_controller(
+            controller=controller,
+            num_intersections=num_intersections,
+            demand_df=demand_df.copy(),
+            scenario=scenario,
+            enable_emergency_priority=enable_emergency_priority,
+            training_days=training_days,
+            ga_generations=ga_generations,
+            ga_population_size=ga_population_size,
+        )
+
+    return build_summary_table(results), results
+
+
+# -----------------------------------------------------------------------------
+# Display helpers
+# -----------------------------------------------------------------------------
+
+
+def show_dataframe_download(df: pd.DataFrame, label: str, filename: str) -> None:
+    st.download_button(
+        label=label,
+        data=df.to_csv(index=False).encode("utf-8"),
+        file_name=filename,
+        mime="text/csv",
+    )
+
+
+def bar_chart(df: pd.DataFrame, x: str, y: str, title: str) -> None:
+    if px is not None:
+        fig = px.bar(df, x=x, y=y, title=title, text_auto=".2f")
+        fig.update_layout(xaxis_title=x.replace("_", " ").title(), yaxis_title=y.replace("_", " ").title())
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.bar_chart(df, x=x, y=y)
+
+
+def line_chart(df: pd.DataFrame, x: str, y: list[str], title: str) -> None:
+    existing_cols = [col for col in y if col in df.columns]
+    if not existing_cols:
+        return
+
+    st.subheader(title)
+    if px is not None:
+        long_df = df[[x] + existing_cols].melt(id_vars=x, var_name="metric", value_name="value")
+        fig = px.line(long_df, x=x, y="value", color="metric", title=title)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.line_chart(df, x=x, y=existing_cols)
+
+
+def display_metric_cards(result: Dict[str, Any]) -> None:
+    metrics = result["metrics"]
+
+    st.subheader("Executive Summary")
+    cols = st.columns(5)
+    cols[0].metric("Avg Vehicle Wait", f"{metrics.avg_wait_time_seconds:.1f}s")
+    cols[1].metric("Throughput", f"{metrics.throughput:,}")
+    cols[2].metric("Final Queue", f"{metrics.final_queue_length:,}")
+    cols[3].metric("Ped Avg Wait", f"{metrics.pedestrian_avg_wait_seconds:.1f}s")
+    cols[4].metric("Emergency Delay", f"{metric_value(metrics, 'emergency_delay_seconds', 0.0):.1f}s")
+
+    cols = st.columns(5)
+    cols[0].metric("Max Vehicle Queue", f"{metrics.max_queue_length:,}")
+    cols[1].metric("Avg Vehicle Queue", f"{metrics.avg_queue_length:.1f}")
+    cols[2].metric("Ped Target Met", "Yes" if metric_value(metrics, "pedestrian_target_met", 0) else "No")
+    cols[3].metric("Ped Final Queue", f"{metrics.pedestrian_final_queue:,}")
+    cols[4].metric("Preemptions", f"{metric_value(metrics, 'emergency_preemptions', 0):,}")
+
+
+def display_single_result(result: Dict[str, Any], num_intersections: int) -> None:
+    metrics = result["metrics"]
+    history = result.get("history", pd.DataFrame())
+    event_log = result.get("event_log", pd.DataFrame())
+
+    display_metric_cards(result)
+
+    tabs = st.tabs([
+        "Vehicle Flow",
+        "Pedestrians",
+        "Emergency & Events",
+        "Controller Timing",
+        "Network Replay",
+        "Raw Data",
+    ])
+
+    with tabs[0]:
+        line_chart(history, "time_step", ["total_queue", "ns_queue", "ew_queue"], "Vehicle Queue Over Time")
+        line_chart(history, "time_step", ["throughput"], "Cumulative Throughput")
+
+    with tabs[1]:
+        cols = st.columns(4)
+        cols[0].metric("Pedestrian Avg Wait", f"{metrics.pedestrian_avg_wait_seconds:.1f}s")
+        cols[1].metric("Target Wait", f"{metric_value(metrics, 'pedestrian_target_wait_seconds', 0):.0f}s")
+        cols[2].metric("Target Met", "Yes" if metric_value(metrics, "pedestrian_target_met", 0) else "No")
+        cols[3].metric("Fairness Gap", f"{metric_value(metrics, 'pedestrian_fairness_gap_seconds', 0.0):.1f}s")
+
+        line_chart(
+            history,
+            "time_step",
+            ["pedestrian_queue", "avg_pedestrian_queue_per_intersection"],
+            "Pedestrian Queue Over Time",
+        )
+        line_chart(
+            history,
+            "time_step",
+            ["pedestrian_max_estimated_wait_seconds", "pedestrian_target_wait_seconds"],
+            "Pedestrian Estimated Max Wait vs Target",
+        )
+        line_chart(
+            history,
+            "time_step",
+            ["pedestrian_phase_active", "pedestrian_active_intersections"],
+            "Pedestrian Phase Activation",
+        )
+
+    with tabs[2]:
+        cols = st.columns(4)
+        cols[0].metric("Emergency Dispatched", metric_value(metrics, "emergency_dispatched", 0))
+        cols[1].metric("Emergency Completed", metric_value(metrics, "emergency_completed", 0))
+        cols[2].metric("Emergency Delay", f"{metric_value(metrics, 'emergency_delay_seconds', 0.0):.1f}s")
+        cols[3].metric("Completion Step", metric_value(metrics, "emergency_completion_step", -1))
+
+        line_chart(
+            history,
+            "time_step",
+            ["emergency_active", "emergency_preemption_active"],
+            "Emergency Priority Activation",
+        )
+
+        st.subheader("Event Log")
+        if event_log is not None and not event_log.empty:
+            st.dataframe(event_log, use_container_width=True)
+            show_dataframe_download(event_log, "Download event log", "event_log.csv")
+        else:
+            st.info("No events were logged for this run.")
+
+    with tabs[3]:
+        line_chart(history, "time_step", ["avg_ns_green", "avg_ew_green"], "Average Green Time Allocation")
+        if "allow_actuated_reallocation" in history.columns:
+            line_chart(history, "time_step", ["allow_actuated_reallocation"], "Actuated Reallocation Enabled")
+
+        ga_history = result.get("ga_generation_history")
+        if ga_history is not None and isinstance(ga_history, pd.DataFrame) and not ga_history.empty:
+            st.subheader("GA Optimization History")
+            st.dataframe(ga_history, use_container_width=True)
+            line_chart(
+                ga_history,
+                "generation",
+                ["best_avg_wait_seconds", "best_fitness", "mean_fitness"],
+                "GA Convergence",
+            )
+
+    with tabs[4]:
+        render_network_replay(
+            result=result,
+            num_intersections=num_intersections,
+        )
+
+    with tabs[5]:
+        st.subheader("Simulation History")
+        st.dataframe(history.head(500), use_container_width=True)
+        show_dataframe_download(history, "Download simulation history", "simulation_history.csv")
+
+
+def display_demand_preview(demand_df: pd.DataFrame) -> None:
+    st.subheader("Demand Preview")
+
+    cols = st.columns(4)
+    cols[0].metric("Rows", f"{len(demand_df):,}")
+    cols[1].metric("Total Vehicle Demand", f"{demand_df['vehicle_demand'].sum():,}")
+    cols[2].metric("Total Ped Demand", f"{demand_df['pedestrian_demand'].max() if 'pedestrian_demand' in demand_df.columns else 0:,}")
+    cols[3].metric("Max Rain Level", f"{demand_df['rain_level'].max() if 'rain_level' in demand_df.columns else 0}")
+
+    st.dataframe(demand_df.head(100), use_container_width=True)
+
+    demand_over_time = demand_df.groupby("time_step", as_index=False)["vehicle_demand"].sum()
+    if px is not None:
+        fig = px.line(demand_over_time, x="time_step", y="vehicle_demand", title="Vehicle Demand Over Time")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.line_chart(demand_over_time, x="time_step", y="vehicle_demand")
+
+    summary = (
+        demand_df.groupby(["intersection_id", "direction"], as_index=False)["vehicle_demand"]
+        .agg(["mean", "max", "sum"])
+        .reset_index()
+    )
+    st.subheader("Demand by Intersection and Direction")
+    st.dataframe(summary, use_container_width=True)
+
+def build_network_replay_figure(
+    intersection_history: pd.DataFrame,
+    selected_time_step: int,
+    num_intersections: int,
+    ) -> go.Figure:
+    """
+    Build a queue-based network replay figure.
+
+    This visualizes the state of each intersection at a selected time step.
+    Marker size represents queue pressure.
+    Labels show queue size, green direction, pedestrian phase, and emergency state.
+    """
+    frame = intersection_history[
+        intersection_history["time_step"] == selected_time_step
+    ].copy()
+
+    if frame.empty:
+        return go.Figure()
+
+    columns = min(5, num_intersections)
+    rows = math.ceil(num_intersections / columns)
+
+    frame["grid_x"] = frame["intersection_id"] % columns
+    frame["grid_y"] = rows - 1 - (frame["intersection_id"] // columns)
+
+    max_queue = max(float(intersection_history["total_queue"].max()),1.0,)
+
+    frame["marker_size"] = 22 + (
+        frame["total_queue"] / max_queue * 55
+    )
+
+    marker_colors = []
+
+    for _, row in frame.iterrows():
+        if int(row.get("emergency_preemption_active", 0)) == 1:
+            marker_colors.append("#d62728")
+        elif int(row.get("pedestrian_phase_active", 0)) == 1:
+            marker_colors.append("#9467bd")
+        elif row["green_direction"] == "NS":
+            marker_colors.append("#2ca02c")
+        else:
+            marker_colors.append("#1f77b4")
+
+    hover_text = []
+
+    for _, row in frame.iterrows():
+        hover_text.append(
+            "<b>Intersection "
+            + str(int(row["intersection_id"]))
+            + "</b><br>"
+            + f"Total queue: {int(row['total_queue'])}<br>"
+            + f"NS queue: {int(row['ns_queue'])}<br>"
+            + f"EW queue: {int(row['ew_queue'])}<br>"
+            + f"Ped queue: {int(row['pedestrian_queue'])}<br>"
+            + f"NS green: {row['ns_green']:.1f}s<br>"
+            + f"EW green: {row['ew_green']:.1f}s<br>"
+            + f"Green priority: {row['green_direction']}<br>"
+            + f"Pedestrian phase: {int(row['pedestrian_phase_active'])}<br>"
+            + f"Emergency preemption: {int(row['emergency_preemption_active'])}"
+        )
+
+    text_labels = []
+
+    for _, row in frame.iterrows():
+        label = (
+            f"I{int(row['intersection_id'])}<br>"
+            f"Q:{int(row['total_queue'])}<br>"
+            f"{row['green_direction']}"
+        )
+
+        if int(row.get("pedestrian_phase_active", 0)) == 1:
+            label += "<br>🚶"
+
+        if int(row.get("emergency_preemption_active", 0)) == 1:
+            label += "<br>🚑"
+
+        text_labels.append(label)
+
+    fig = go.Figure()
+
+    # Draw simple road grid lines.
+    for y in range(rows):
+        fig.add_trace(
+            go.Scatter(
+                x=[0, columns - 1],
+                y=[y, y],
+                mode="lines",
+                line=dict(width=2, color="lightgray"),
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+
+    for x in range(columns):
+        fig.add_trace(
+            go.Scatter(
+                x=[x, x],
+                y=[0, rows - 1],
+                mode="lines",
+                line=dict(width=2, color="lightgray"),
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+
+    fig.add_trace(
+        go.Scatter(
+            x=frame["grid_x"],
+            y=frame["grid_y"],
+            mode="markers+text",
+            marker=dict(
+                size=frame["marker_size"],
+                color=marker_colors,
+                line=dict(width=2, color="black"),
+                opacity=0.85,
+            ),
+            text=text_labels,
+            textposition="middle center",
+            hovertext=hover_text,
+            hoverinfo="text",
+            showlegend=False,
+        )
+    )
+
+    fig.update_layout(
+        title=f"Network Replay — Minute {selected_time_step}",
+        height=520,
+        xaxis=dict(
+            visible=False,
+            range=[-0.7, columns - 0.3],
+        ),
+        yaxis=dict(
+            visible=False,
+            range=[-0.7, rows - 0.3],
+            scaleanchor="x",
+            scaleratio=1,
+        ),
+        margin=dict(l=20, r=20, t=60, b=20),
+    )
+
+    return fig
+
+def render_network_replay(result: dict,num_intersections: int,) -> None:
+    """
+    Render an interactive queue-based network replay.
+    """
+    intersection_history = result.get("intersection_history")
+    event_log = result.get("event_log")
+
+    if intersection_history is None or intersection_history.empty:
+        st.warning(
+            "Network replay data is not available. "
+            "Make sure the simulator returns 'intersection_history'."
+        )
+        return
+
+    st.subheader("🗺️ Network Simulation Replay")
+
+    st.caption(
+        """
+        This is a queue-based replay. Marker size represents congestion.
+        Green means NS priority, blue means EW priority, purple indicates a
+        pedestrian phase, and red indicates emergency preemption.
+        """
+    )
+
+    min_time = int(intersection_history["time_step"].min())
+    max_time = int(intersection_history["time_step"].max())
+
+    col1, col2, col3 = st.columns([2, 1, 1])
+
+    selected_time_step = col1.slider(
+        "Replay minute",
+        min_value=min_time,
+        max_value=max_time,
+        value=min_time,
+        step=1,
+    )
+
+    playback_speed = col2.selectbox(
+        "Playback speed",
+        ["Slow", "Medium", "Fast"],
+        index=1,
+    )
+
+    speed_map = {
+        "Slow": 0.35,
+        "Medium": 0.18,
+        "Fast": 0.08,
+    }
+
+    show_events = col3.checkbox(
+        "Show nearby events",
+        value=True,
+    )
+
+    replay_placeholder = st.empty()
+
+    fig = build_network_replay_figure(
+        intersection_history=intersection_history,
+        selected_time_step=selected_time_step,
+        num_intersections=num_intersections,
+    )
+
+    replay_placeholder.plotly_chart(
+        fig,
+        use_container_width=True,
+    )
+
+    if st.button("▶ Play replay"):
+        progress = st.progress(0)
+
+        time_steps = list(range(min_time, max_time + 1))
+
+        for index, time_step_value in enumerate(time_steps):
+            fig = build_network_replay_figure(
+                intersection_history=intersection_history,
+                selected_time_step=time_step_value,
+                num_intersections=num_intersections,
+            )
+
+            replay_placeholder.plotly_chart(
+                fig,
+                use_container_width=True,
+            )
+
+            progress.progress(
+                int((index + 1) / len(time_steps) * 100)
+            )
+
+            time.sleep(speed_map[playback_speed])
+
+    if show_events and event_log is not None and not event_log.empty:
+        st.markdown("#### Events near selected minute")
+
+        nearby_events = event_log[
+            event_log["time_step"].between(
+                selected_time_step - 3,
+                selected_time_step + 3,
+            )
+        ]
+
+        if nearby_events.empty:
+            st.info("No major logged events near this minute.")
+        else:
+            st.dataframe(nearby_events,use_container_width=True,)
+
+
+# -----------------------------------------------------------------------------
+# Main app
+# -----------------------------------------------------------------------------
+
+
+def main() -> None:
     st.set_page_config(
         page_title="Smart Traffic Light Optimization",
         page_icon="🚦",
@@ -35,445 +723,214 @@ def main():
     )
 
     st.title("🚦 Smart City Traffic Light Optimization")
-    st.write(
-        """
-        This demo will compare fixed traffic lights against an adaptive
-        ML + optimization-based controller.
-        """
+    st.caption(
+        "Queue-based simulation, ML demand prediction, real-time optimization, "
+        "GA timing plans, pedestrian fairness, and emergency preemption."
     )
 
-    st.sidebar.header("Simulation Settings")
+    with st.sidebar:
+        st.header("Simulation Settings")
 
-    num_intersections = st.sidebar.slider(
-        "Number of intersections",
-        min_value=1,
-        max_value=MAX_NUM_INTERSECTIONS,
-        value=DEFAULT_NUM_INTERSECTIONS,
-    )
-
-    scenario = st.sidebar.selectbox(
-        "Scenario",
-        [
-            "normal",
-            "rain",
-            "accident",
-            "pedestrian",
-            "emergency",
-            "combined",
-        ],
-    )
-    enable_emergency_priority = st.sidebar.checkbox(
-        "Enable emergency signal priority",
-        value=True,
-    )
-    controller = st.sidebar.selectbox(
-        "Controller",
-        [
-            "fixed_equal",
-            "fixed_calibrated",
-            "adaptive",
-            "ga",
-            "rl_experimental",
-        ],
-    )
-
-    duration = st.sidebar.slider(
-        "Simulation duration, minutes",
-        min_value=30,
-        max_value=240,
-        value=DEFAULT_SIMULATION_MINUTES,
-        step=30,
-    )
-
-    training_days = st.sidebar.slider(
-        "ML training days",
-        min_value=1,
-        max_value=7,
-        value=3,
-    )
-
-    st.subheader("Current Configuration")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric("Intersections", num_intersections)
-    col2.metric("Scenario", scenario)
-    col3.metric("Controller", controller)
-    col4.metric("Duration", f"{duration} min")
-
-    st.info(" Metrics have been added")
-
-
-    if st.button("Generate traffic demand preview"):
-        demand_df = generate_traffic_demand(
-            num_intersections=num_intersections,
-            simulation_minutes=duration,
-            scenario=scenario,
+        num_intersections = st.slider(
+            "Number of intersections",
+            min_value=1,
+            max_value=MAX_NUM_INTERSECTIONS,
+            value=DEFAULT_NUM_INTERSECTIONS,
         )
 
-        st.subheader("Generated Demand Sample")
-        st.dataframe(demand_df.head(60), use_container_width=True)
+        scenario = st.selectbox("Scenario", SCENARIOS, index=SCENARIOS.index("combined"))
 
-        st.subheader("Demand Summary by Intersection and Direction")
-        summary = (
-            demand_df
-            .groupby(["intersection_id", "direction"])["vehicle_demand"]
-            .agg(["mean", "max", "sum"])
-            .reset_index()
-        )
-        st.dataframe(summary, use_container_width=True)
+        controller = st.selectbox("Controller", CONTROLLERS, index=CONTROLLERS.index("ga") if "ga" in CONTROLLERS else 0)
 
-        st.subheader("Vehicle Demand Over Time")
-        chart_data = (
-            demand_df
-            .groupby("time_step")["vehicle_demand"]
-            .sum()
-            .reset_index()
-        )
-        st.line_chart(chart_data, x="time_step", y="vehicle_demand")
-
-    if st.button("Run fixed timing simulation"):
-        demand_df = generate_traffic_demand(
-            num_intersections=num_intersections,
-            simulation_minutes=duration,
-            scenario=scenario,
+        duration = st.slider(
+            "Simulation duration, minutes",
+            min_value=30,
+            max_value=240,
+            value=DEFAULT_SIMULATION_MINUTES,
+            step=30,
         )
 
-        if controller == "fixed_equal":
-            result = run_fixed_equal_simulation(
-                num_intersections=num_intersections,
-                demand_df=demand_df,
-                scenario=scenario,
-                enable_emergency_priority=enable_emergency_priority,
-            )
+        training_days = st.slider("ML training days", min_value=1, max_value=7, value=1)
 
-        elif controller == "fixed_calibrated":
-            result = run_fixed_calibrated_simulation(
-                num_intersections=num_intersections,
-                demand_df=demand_df,
-                scenario=scenario,
-                enable_emergency_priority=enable_emergency_priority,
-            )
+        st.divider()
+        st.subheader("Emergency")
+        enable_emergency_priority = st.checkbox("Enable emergency signal priority", value=True)
 
-        elif controller == "adaptive":
-            with st.spinner("Training ML predictor for adaptive controller..."):
-                training_minutes = training_days * 24 * 60
+        st.divider()
+        st.subheader("GA Settings")
+        ga_generations = st.slider("GA generations", min_value=5, max_value=40, value=20, step=5)
+        ga_population_size = st.slider("GA population size", min_value=8, max_value=64, value=32, step=8)
 
-                training_df = generate_traffic_demand(
+    config_cols = st.columns(5)
+    config_cols[0].metric("Intersections", num_intersections)
+    config_cols[1].metric("Scenario", scenario)
+    config_cols[2].metric("Controller", controller)
+    config_cols[3].metric("Duration", f"{duration} min")
+    config_cols[4].metric("Training Days", training_days)
+
+    st.info(
+        "Recommended demo: Run `combined` with `ga`, then open Final Report. "
+        "Use `emergency` scenario to show signal preemption and event logs."
+    )
+
+    main_tabs = st.tabs([
+        "Run Simulation",
+        "Demand Preview",
+        "ML Predictor",
+        "Final Report",
+        "Adaptive Tuning",
+    ])
+
+    with main_tabs[0]:
+        st.subheader("Run Selected Controller")
+        run_clicked = st.button("Run simulation", type="primary", use_container_width=True)
+
+        if run_clicked:
+            with st.spinner(f"Running {controller} controller on {scenario} scenario..."):
+                demand_df = generate_demand(num_intersections, duration, scenario)
+                result = run_controller(
+                    controller=controller,
                     num_intersections=num_intersections,
-                    simulation_minutes=training_minutes,
-                    scenario=scenario,
-                )
-
-                ml_result = train_and_evaluate_predictor(
-                    demand_df=training_df,
-                    test_size=0.2,
-                )
-
-                demand_df = add_predictions_to_demand(
                     demand_df=demand_df,
+                    scenario=scenario,
+                    enable_emergency_priority=enable_emergency_priority,
+                    training_days=training_days,
+                    ga_generations=ga_generations,
+                    ga_population_size=ga_population_size,
+                )
+                st.session_state["last_result"] = result
+
+        if "last_result" in st.session_state:
+            display_single_result(st.session_state["last_result"], num_intersections)
+        else:
+            st.info("Run a simulation to display results.")
+
+    with main_tabs[1]:
+        if st.button("Generate demand preview", use_container_width=True):
+            with st.spinner("Generating demand preview..."):
+                demand_df = generate_demand(num_intersections, duration, scenario)
+                st.session_state["last_demand_preview"] = demand_df
+
+        if "last_demand_preview" in st.session_state:
+            display_demand_preview(st.session_state["last_demand_preview"])
+        else:
+            st.info("Generate a demand preview to inspect synthetic arrivals.")
+
+    with main_tabs[2]:
+        st.subheader("ML Demand Predictor Diagnostics")
+        if st.button("Train and evaluate ML predictor", use_container_width=True):
+            with st.spinner("Training Random Forest demand predictor..."):
+                ml_result = train_predictor(num_intersections, training_days, scenario)
+                st.session_state["last_ml_result"] = ml_result
+
+        if "last_ml_result" in st.session_state:
+            ml_result = st.session_state["last_ml_result"]
+            baseline_eval = ml_result["baseline_evaluation"]
+            model_eval = ml_result["model_evaluation"]
+            feature_importance = ml_result["feature_importance"]
+
+            performance_df = pd.DataFrame(
+                [
+                    {
+                        "model": baseline_eval.model_name,
+                        "MAE": baseline_eval.mae,
+                        "RMSE": baseline_eval.rmse,
+                        "R2": baseline_eval.r2,
+                    },
+                    {
+                        "model": model_eval.model_name,
+                        "MAE": model_eval.mae,
+                        "RMSE": model_eval.rmse,
+                        "R2": model_eval.r2,
+                    },
+                ]
+            )
+
+            cols = st.columns(3)
+            cols[0].metric("MAE Improvement", f"{baseline_eval.mae - model_eval.mae:.2f}")
+            rmse_improvement = (
+                (baseline_eval.rmse - model_eval.rmse) / baseline_eval.rmse * 100
+                if baseline_eval.rmse > 0
+                else 0.0
+            )
+            cols[1].metric("RMSE Improvement", format_pct(rmse_improvement))
+            cols[2].metric("Model R²", f"{model_eval.r2:.3f}")
+
+            st.dataframe(performance_df, use_container_width=True)
+            st.subheader("Feature Importance")
+            st.dataframe(feature_importance.head(20), use_container_width=True)
+            bar_chart(feature_importance.head(12), "feature", "importance", "Top Feature Importances")
+        else:
+            st.info("Train the predictor to see performance and feature importance.")
+
+    with main_tabs[3]:
+        st.subheader("Final Benchmark Report")
+        st.write(
+            "Runs fixed equal, fixed calibrated, adaptive, Scipy MPC, and GA on the same demand scenario. "
+        )
+
+        if st.button("Run final report", type="primary", use_container_width=True):
+            with st.spinner("Running final report. GA may take a little longer..."):
+                summary_df, final_results = run_final_report(
+                    num_intersections=num_intersections,
+                    duration=duration,
+                    scenario=scenario,
+                    training_days=training_days,
+                    enable_emergency_priority=enable_emergency_priority,
+                    ga_generations=ga_generations,
+                    ga_population_size=ga_population_size,
+                )
+                st.session_state["final_summary_df"] = summary_df
+                st.session_state["final_results"] = final_results
+
+        if "final_summary_df" in st.session_state:
+            summary_df = st.session_state["final_summary_df"]
+            st.dataframe(summary_df, use_container_width=True)
+            show_dataframe_download(summary_df, "Download final results CSV", "final_results_summary.csv")
+
+            cols = st.columns(3)
+            best = summary_df.iloc[0]
+            fixed = summary_df[summary_df["controller"] == "fixed_equal"].iloc[0]
+            cols[0].metric("Best Controller", best["controller"])
+            cols[1].metric("Best Avg Wait", f"{best['avg_wait_seconds']:.1f}s")
+            cols[2].metric("Best Improvement", format_pct(best["improvement_vs_fixed_equal_pct"]))
+
+            chart_cols = st.columns(2)
+            with chart_cols[0]:
+                bar_chart(summary_df, "controller", "avg_wait_seconds", "Average Wait by Controller")
+            with chart_cols[1]:
+                bar_chart(summary_df, "controller", "improvement_vs_fixed_equal_pct", "Improvement vs Fixed Equal")
+            bar_chart(summary_df, "controller", "final_queue", "Final Queue by Controller")
+        else:
+            st.info("Run the final report to generate presentation-ready results.")
+
+    with main_tabs[4]:
+        st.subheader("Adaptive Controller Tuning")
+        if tune_adaptive_controller is None:
+            st.warning("tune_adaptive_controller is not available in this branch.")
+        elif st.button("Tune adaptive controller", use_container_width=True):
+            with st.spinner("Training predictor and tuning adaptive controller..."):
+                ml_result = train_predictor(num_intersections, training_days, scenario)
+                tuning_demand_df = generate_demand(num_intersections, duration, scenario)
+                tuning_demand_df = add_predictions_to_demand(
+                    demand_df=tuning_demand_df,
                     predictor=ml_result["predictor"],
                 )
+                tuning_result = tune_adaptive_controller(
+                    num_intersections=num_intersections,
+                    demand_df=tuning_demand_df,
+                )
+                st.session_state["last_tuning_result"] = tuning_result
 
-            result = run_adaptive_simulation(
-                num_intersections=num_intersections,
-                demand_df=demand_df,
-                scenario=scenario,
-                enable_emergency_priority=enable_emergency_priority,
-            )
+        if "last_tuning_result" in st.session_state:
+            tuning_result = st.session_state["last_tuning_result"]
+            st.write("Best parameters:")
+            st.json(tuning_result["best_params"])
+            tuning_df = tuning_result["tuning_results"]
+            st.dataframe(tuning_df.head(30), use_container_width=True)
+            show_dataframe_download(tuning_df, "Download tuning results", "adaptive_tuning_results.csv")
+            bar_chart(tuning_df.head(15), "queue_weight", "avg_wait_seconds", "Top Adaptive Tuning Results")
 
-        else:
-            st.warning(
-                f"Controller '{controller}' will be implemented in a later phase."
-            )
-            st.stop()
 
-        metrics = result["metrics"]
-        history = result["history"]
-
-        st.subheader("Results")
-
-        col1, col2, col3, col4 = st.columns(4)
-
-        col1.metric("Avg Vehicle Wait", f"{metrics.avg_wait_time_seconds:.1f}s")
-        col2.metric("Vehicle Throughput", metrics.throughput)
-        col3.metric("Max Vehicle Queue", metrics.max_queue_length)
-        col4.metric("Final Vehicle Queue", metrics.final_queue_length)
-
-        col5, col6, col7, col8 = st.columns(4)
-
-        col5.metric("Avg Ped Wait", f"{metrics.pedestrian_avg_wait_seconds:.1f}s")
-        col6.metric("Ped Throughput", metrics.pedestrian_throughput)
-        col7.metric("Max Ped Queue", metrics.pedestrian_max_queue)
-        col8.metric("Final Ped Queue", metrics.pedestrian_final_queue)
-
-        st.subheader("Emergency Metrics")
-
-        col1, col2, col3 = st.columns(3)
-
-        col1.metric(
-            "Emergency Delay",
-            f"{metrics.emergency_delay_seconds:.1f}s",
-        )
-
-        col2.metric(
-            "Preemptions",
-            metrics.emergency_preemptions,
-        )
-
-        col3.metric(
-            "Route Length",
-            metrics.emergency_route_length,
-        )
-
-        st.subheader("Vehicle Queue Over Time")
-        st.line_chart(
-            history,
-            x="time_step",
-            y=["total_queue", "ns_queue", "ew_queue"],
-        )
-
-        st.subheader("Pedestrian Queue Over Time")
-        st.line_chart(
-            history,
-            x="time_step",
-            y=["pedestrian_queue", "avg_pedestrian_queue_per_intersection"],
-        )
-        st.subheader("Average Green Time Allocation")
-        st.line_chart(
-            history,
-            x="time_step",
-            y=["avg_ns_green", "avg_ew_green"],
-        )
-
-        st.subheader("Pedestrian Phase Activation")
-        st.line_chart(
-            history,
-            x="time_step",
-            y=["pedestrian_phase_active", "pedestrian_active_intersections"],
-        )
-
-        st.subheader("Simulation History")
-        st.dataframe(history.head(100), use_container_width=True)
-    st.divider()
-    st.subheader("ML Traffic Demand Predictor")
-
-    if st.button("Train and evaluate ML predictor"):
-        training_minutes = training_days * 24 * 60
-
-        with st.spinner("Generating training data and fitting model..."):
-            training_df = generate_traffic_demand(
-                num_intersections=num_intersections,
-                simulation_minutes=training_minutes,
-                scenario=scenario,
-            )
-
-            ml_result = train_and_evaluate_predictor(
-                demand_df=training_df,
-                test_size=0.2,
-            )
-
-        baseline_eval = ml_result["baseline_evaluation"]
-        model_eval = ml_result["model_evaluation"]
-        feature_importance = ml_result["feature_importance"]
-
-        st.subheader("Prediction Performance")
-
-        performance_df = pd.DataFrame(
-            [
-                {
-                    "model": baseline_eval.model_name,
-                    "MAE": baseline_eval.mae,
-                    "RMSE": baseline_eval.rmse,
-                    "R2": baseline_eval.r2,
-                },
-                {
-                    "model": model_eval.model_name,
-                    "MAE": model_eval.mae,
-                    "RMSE": model_eval.rmse,
-                    "R2": model_eval.r2,
-                },
-            ]
-        )
-
-        st.dataframe(performance_df, use_container_width=True)
-
-        col1, col2, col3 = st.columns(3)
-
-        col1.metric(
-            "MAE Improvement",
-            f"{baseline_eval.mae - model_eval.mae:.2f}",
-        )
-
-        rmse_improvement_pct = (
-            (baseline_eval.rmse - model_eval.rmse) / baseline_eval.rmse * 100
-            if baseline_eval.rmse > 0
-            else 0.0
-        )
-
-        col2.metric(
-            "RMSE Improvement",
-            f"{rmse_improvement_pct:.1f}%",
-        )
-
-        col3.metric(
-            "Model R²",
-            f"{model_eval.r2:.3f}",
-        )
-
-        st.subheader("Top Feature Importances")
-        st.dataframe(feature_importance.head(15), use_container_width=True)
-
-        st.bar_chart(
-            feature_importance.head(10),
-            x="feature",
-            y="importance",
-        )
-
-    st.divider()
-    st.subheader("Controller Benchmark")
-
-    if st.button("Run controller benchmark"):
-        training_minutes = training_days * 24 * 60
-
-        with st.spinner("Training predictor and running benchmark..."):
-            training_df = generate_traffic_demand(
-                num_intersections=num_intersections,
-                simulation_minutes=training_minutes,
-                scenario=scenario,
-            )
-
-            ml_result = train_and_evaluate_predictor(
-                demand_df=training_df,
-                test_size=0.2,
-            )
-
-            benchmark_demand_df = generate_traffic_demand(
-                num_intersections=num_intersections,
-                simulation_minutes=duration,
-                scenario=scenario,
-            )
-
-            benchmark_demand_df = add_predictions_to_demand(
-                demand_df=benchmark_demand_df,
-                predictor=ml_result["predictor"],
-            )
-
-            benchmark_result = run_controller_benchmark(
-                num_intersections=num_intersections,
-                demand_df=benchmark_demand_df,
-            )
-
-        comparison_df = benchmark_result["comparison"]
-
-        st.dataframe(comparison_df, use_container_width=True)
-
-        st.bar_chart(
-            comparison_df,
-            x="controller",
-            y="avg_wait_seconds",
-        )
-
-        st.bar_chart(
-            comparison_df,
-            x="controller",
-            y="improvement_vs_fixed_equal_pct",
-        )
-
-    st.divider()
-    st.subheader("Adaptive Controller Tuning")
-
-    if st.button("Tune adaptive controller"):
-        training_minutes = training_days * 24 * 60
-
-        with st.spinner("Training predictor and tuning adaptive controller..."):
-            training_df = generate_traffic_demand(
-                num_intersections=num_intersections,
-                simulation_minutes=training_minutes,
-                scenario=scenario,
-            )
-
-            ml_result = train_and_evaluate_predictor(
-                demand_df=training_df,
-                test_size=0.2,
-            )
-
-            tuning_demand_df = generate_traffic_demand(
-                num_intersections=num_intersections,
-                simulation_minutes=duration,
-                scenario=scenario,
-            )
-
-            tuning_demand_df = add_predictions_to_demand(
-                demand_df=tuning_demand_df,
-                predictor=ml_result["predictor"],
-            )
-
-            tuning_result = tune_adaptive_controller(
-                num_intersections=num_intersections,
-                demand_df=tuning_demand_df,
-            )
-
-        st.write("Best parameters:")
-        st.json(tuning_result["best_params"])
-
-        tuning_df = tuning_result["tuning_results"]
-
-        st.dataframe(tuning_df.head(20), use_container_width=True)
-
-        st.bar_chart(
-            tuning_df.head(10),
-            x="queue_weight",
-            y="avg_wait_seconds",
-        )
-    event_log = result.get("event_log")
-
-    if event_log is not None and not event_log.empty:
-        st.subheader("Event Log")
-        st.dataframe(event_log, use_container_width=True)
-
-    if "emergency_preemption_active" in history.columns:
-        st.subheader("Emergency Priority Activation")
-
-        st.line_chart(
-            history,
-            x="time_step",
-            y=[
-                "emergency_active",
-                "emergency_preemption_active",
-            ],
-        )
-    st.subheader("Pedestrian Fairness")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric(
-        "Pedestrian Avg Wait",
-        f"{metrics.pedestrian_avg_wait_seconds:.1f}s",
-    )
-
-    col2.metric(
-        "Target Wait",
-        f"{metrics.pedestrian_target_wait_seconds:.0f}s",
-    )
-
-    col3.metric(
-        "Target Met",
-        "Yes" if metrics.pedestrian_target_met else "No",
-    )
-
-    col4.metric(
-        "Fairness Gap",
-        f"{metrics.pedestrian_fairness_gap_seconds:.1f}s",
-    )
-    if "pedestrian_max_estimated_wait_seconds" in history.columns:
-        st.line_chart(
-            history,
-            x="time_step",
-            y=[
-                "pedestrian_max_estimated_wait_seconds",
-                "pedestrian_target_wait_seconds",
-            ],
-        )
 if __name__ == "__main__":
     main()

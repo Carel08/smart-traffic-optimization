@@ -168,8 +168,12 @@ class QueueTrafficSimulator:
         self.pedestrian_total_wait_seconds = 0.0
         self.pedestrian_max_queue = 0
         self.pedestrian_max_estimated_wait_seconds_observed = 0.0
+        self.last_logged_weather_state = None
+        self.last_accident_active = False
+        self.last_event_surge_active = False
 
         self.history: List[Dict[str, float]] = []
+        self.intersection_history = []
 
         self.scenario = scenario
         self.enable_emergency_priority = enable_emergency_priority
@@ -214,6 +218,7 @@ class QueueTrafficSimulator:
         return {
             "metrics": metrics,
             "history": pd.DataFrame(self.history),
+            "intersection_history": pd.DataFrame(self.intersection_history),
             "event_log": self.get_event_log(),
         }
 
@@ -226,7 +231,9 @@ class QueueTrafficSimulator:
         """
         Run one simulation step using the supplied controller.
         """
+
         self._add_arrivals(step_demand)
+        self._log_scenario_events(time_step=time_step,step_demand=step_demand,)
 
         simulator_state = self.get_state()
 
@@ -275,6 +282,11 @@ class QueueTrafficSimulator:
             green_times_by_intersection=green_times,
             allow_actuated_reallocation=decision.allow_actuated_reallocation,
             emergency_info=emergency_info,
+        )
+        self._record_intersection_history(
+            time_step=time_step,
+            decision=decision,
+            pedestrian_phase_by_intersection=pedestrian_phase_by_intersection,
         )
 
     def get_state(self) -> Dict:
@@ -342,6 +354,139 @@ class QueueTrafficSimulator:
             pedestrian_demand = int(pedestrian_demand)
             self.pedestrian_queues[int(intersection_id)] += pedestrian_demand
             self.pedestrian_total_arrivals += pedestrian_demand
+
+    def _log_scenario_events(
+            self,
+            time_step: int,
+            step_demand: pd.DataFrame,
+    ) -> None:
+        """
+        Log scenario-level events such as weather transitions,
+        accident start/end, and event demand surges.
+
+        """
+        if step_demand.empty:
+            return
+
+        # --------------------------------------------------
+        # Weather transition logging
+        # --------------------------------------------------
+        if "weather" in step_demand.columns:
+            weather_state = str(step_demand["weather"].mode().iloc[0])
+
+            if weather_state != self.last_logged_weather_state:
+                if weather_state == "clear":
+                    message = "Weather returned to clear conditions."
+                    severity = "info"
+                elif weather_state == "light_rain":
+                    message = (
+                        "Light rain started. Demand is slightly higher and "
+                        "road capacity is reduced."
+                    )
+                    severity = "info"
+                elif weather_state == "heavy_rain":
+                    message = (
+                        "Heavy rain started. Demand is higher and road "
+                        "capacity is materially reduced."
+                    )
+                    severity = "warning"
+                else:
+                    message = f"Weather changed to {weather_state}."
+                    severity = "info"
+
+                self.event_logger.log(
+                    time_step=time_step,
+                    event_type="weather_change",
+                    message=message,
+                    severity=severity,
+                    dedupe_key=f"weather_change_{time_step}_{weather_state}",
+                )
+
+                self.last_logged_weather_state = weather_state
+
+        # --------------------------------------------------
+        # Event surge logging
+        # --------------------------------------------------
+        event_surge_active = False
+
+        if "event_multiplier" in step_demand.columns:
+            event_surge_active = (
+                    float(step_demand["event_multiplier"].max()) > 1.0
+            )
+
+        if event_surge_active and not self.last_event_surge_active:
+            self.event_logger.log(
+                time_step=time_step,
+                event_type="event_surge_started",
+                message=(
+                    "Event-driven demand surge started. Vehicle arrivals "
+                    "are temporarily elevated."
+                ),
+                severity="warning",
+                dedupe_key=f"event_surge_started_{time_step}",
+            )
+
+        if not event_surge_active and self.last_event_surge_active:
+            self.event_logger.log(
+                time_step=time_step,
+                event_type="event_surge_ended",
+                message="Event-driven demand surge ended.",
+                severity="info",
+                dedupe_key=f"event_surge_ended_{time_step}",
+            )
+
+        self.last_event_surge_active = event_surge_active
+
+        # --------------------------------------------------
+        # Accident logging
+        # --------------------------------------------------
+        accident_active = False
+        accident_rows = pd.DataFrame()
+
+        if "accident_active" in step_demand.columns:
+            accident_rows = step_demand[
+                step_demand["accident_active"].astype(int) == 1
+                ]
+            accident_active = not accident_rows.empty
+
+        if accident_active and not self.last_accident_active:
+            affected = (
+                accident_rows[
+                    ["intersection_id", "direction"]
+                ]
+                .drop_duplicates()
+                .sort_values(["intersection_id", "direction"])
+            )
+
+            affected_text = ", ".join(
+                f"intersection {int(row.intersection_id)} {row.direction}"
+                for row in affected.itertuples(index=False)
+            )
+
+            self.event_logger.log(
+                time_step=time_step,
+                event_type="accident_started",
+                message=(
+                    f"Accident started on {affected_text}. "
+                    "Capacity is reduced on the affected approach."
+                ),
+                severity="critical",
+                dedupe_key=f"accident_started_{time_step}",
+            )
+
+        if not accident_active and self.last_accident_active:
+            self.event_logger.log(
+                time_step=time_step,
+                event_type="accident_cleared",
+                message=(
+                    "Accident cleared. Affected road capacity has returned "
+                    "to normal."
+                ),
+                severity="info",
+                dedupe_key=f"accident_cleared_{time_step}",
+            )
+
+        self.last_accident_active = accident_active
 
     def _pedestrian_phase_by_intersection(
             self,
@@ -616,7 +761,95 @@ class QueueTrafficSimulator:
         self.pedestrian_total_wait_seconds += (
             total_pedestrian_queue * SECONDS_PER_STEP
         )
+    
+    def _get_green_value( self,green_split,direction: str,) -> float:
+        """
+        Safely read green time from either a dict-like split or dataclass-like split.
+        """
+        if isinstance(green_split, dict):
+            return float(green_split.get(direction, 0.0))
 
+        return float(getattr(green_split, direction, 0.0))
+    def _record_intersection_history(
+        self,
+        time_step: int,
+        decision,
+        pedestrian_phase_by_intersection: dict[int, bool],
+    ) -> None:
+        """
+        Record per-intersection state for Streamlit network replay.
+
+        This is separate from aggregate history because the dashboard needs
+        intersection-level queues and green-time decisions.
+        """
+        emergency_active = int(getattr(self, "emergency_active", False))
+        emergency_preemption_active = int(
+            getattr(self, "emergency_preemption_active", False)
+        )
+
+        emergency_current_intersection = getattr(
+            self,
+            "emergency_current_intersection",
+            None,
+        )
+
+        for intersection_id in range(self.num_intersections):
+            queues = self.queues.get(
+                intersection_id,
+                {"NS": 0, "EW": 0},
+            )
+
+            green_split = decision.green_times.get(intersection_id, {})
+
+            ns_green = self._get_green_value(
+                green_split=green_split,
+                direction="NS",
+            )
+
+            ew_green = self._get_green_value(
+                green_split=green_split,
+                direction="EW",
+            )
+
+            green_direction = "NS" if ns_green >= ew_green else "EW"
+
+            ns_queue = int(queues.get("NS", 0))
+            ew_queue = int(queues.get("EW", 0))
+            total_queue = ns_queue + ew_queue
+
+            pedestrian_queue = int(
+                self.pedestrian_queues.get(intersection_id, 0)
+            )
+
+            self.intersection_history.append(
+                {
+                    "time_step": time_step,
+                    "intersection_id": intersection_id,
+                    "ns_queue": ns_queue,
+                    "ew_queue": ew_queue,
+                    "total_queue": total_queue,
+                    "pedestrian_queue": pedestrian_queue,
+                    "ns_green": ns_green,
+                    "ew_green": ew_green,
+                    "green_direction": green_direction,
+                    "pedestrian_phase_active": int(
+                        pedestrian_phase_by_intersection.get(
+                            intersection_id,
+                            False,
+                        )
+                    ),
+                    "emergency_active": emergency_active,
+                    "emergency_preemption_active": emergency_preemption_active,
+                    "emergency_current_intersection": (
+                        emergency_current_intersection
+                        if emergency_current_intersection is not None
+                        else -1
+                    ),
+                }
+            )
+    
+
+    
     def _record_history(
             self,
             time_step: int,
@@ -822,7 +1055,10 @@ class QueueTrafficSimulator:
         return self.event_logger.to_dataframe()
 
     def _scenario_supports_emergency(self) -> bool:
-        return self.scenario in EMERGENCY_SCENARIOS
+        return (
+                self.enable_emergency_priority
+                and self.scenario in EMERGENCY_SCENARIOS
+        )
 
     def _accident_context_from_step(
             self,
