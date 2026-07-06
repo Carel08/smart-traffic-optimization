@@ -30,8 +30,8 @@ from src.simulator import (
     run_fixed_calibrated_simulation,
     run_adaptive_simulation,
     run_enhanced_adaptive_simulation,
+    run_scipy_mpc_simulation,
 )
-
 
 from src.data_generator import generate_traffic_demand
 from src.ga_optimizer import optimize_ga_timing_plan
@@ -146,6 +146,20 @@ def run_controller_benchmark(
         metrics_to_row(
             controller_name="enhanced_adaptive",
             metrics=enhanced_adaptive_result["metrics"],
+            fixed_equal_avg_wait=fixed_equal_avg_wait,
+        )
+    )
+
+    scipy_mpc_result = run_scipy_mpc_simulation(
+        num_intersections=num_intersections,
+        demand_df=demand_df,
+    )
+    results["scipy_mpc"] = scipy_mpc_result
+
+    rows.append(
+        metrics_to_row(
+            controller_name="scipy_mpc",
+            metrics=scipy_mpc_result["metrics"],
             fixed_equal_avg_wait=fixed_equal_avg_wait,
         )
     )

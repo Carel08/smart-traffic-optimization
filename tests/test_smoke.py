@@ -212,3 +212,42 @@ def test_emergency_scenario_runs():
     assert "emergency_active" in history.columns
     assert "emergency_preemption_active" in history.columns
     assert event_log is not None
+
+def test_scipy_mpc_simulation_runs():
+    from src.data_generator import generate_traffic_demand
+    from src.predictor import (
+        train_and_evaluate_predictor,
+        add_predictions_to_demand,
+    )
+    from src.simulator import run_scipy_mpc_simulation
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=80,
+        scenario="normal",
+    )
+
+    ml_result = train_and_evaluate_predictor(
+        demand_df=demand_df,
+        test_size=0.2,
+    )
+
+    demand_df = add_predictions_to_demand(
+        demand_df=demand_df,
+        predictor=ml_result["predictor"],
+    )
+
+    result = run_scipy_mpc_simulation(
+        num_intersections=4,
+        demand_df=demand_df,
+        scenario="normal",
+    )
+
+    metrics = result["metrics"]
+    history = result["history"]
+
+    assert metrics.total_arrivals >= 0
+    assert metrics.throughput >= 0
+    assert metrics.avg_wait_time_seconds >= 0
+    assert "avg_ns_green" in history.columns
+    assert "avg_ew_green" in history.columns

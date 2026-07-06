@@ -19,6 +19,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict
 
+from scipy.optimize import minimize_scalar
+
 import pandas as pd
 
 from src.config import (
@@ -36,6 +38,14 @@ from src.config import (
     ADAPTIVE_MAX_GREEN,
     ADAPTIVE_PRESSURE_EXPONENT,
     ADAPTIVE_CAPACITY_AWARE,
+    BASE_SERVICE_RATE,
+    MPC_MIN_GREEN,
+    MPC_MAX_GREEN,
+    MPC_QUEUE_WEIGHT,
+    MPC_SQUARED_QUEUE_WEIGHT,
+    MPC_IMBALANCE_WEIGHT,
+    MPC_PREDICTION_WEIGHT,
+    MPC_OPTIMIZER_XTOL,
 )
 
 
@@ -505,6 +515,224 @@ class EnhancedAdaptiveController(BaseTrafficController):
             controller_name=self.name,
             allow_actuated_reallocation=True,
         )
+
+    @staticmethod
+    def _predicted_demand_by_direction(
+        intersection_rows: pd.DataFrame,
+    ) -> Dict[str, float]:
+        demand_by_direction = {
+            direction: 0.0
+            for direction in DIRECTIONS
+        }
+
+        prediction_column = (
+            "predicted_vehicle_demand"
+            if "predicted_vehicle_demand" in intersection_rows.columns
+            else "vehicle_demand"
+        )
+
+        for _, row in intersection_rows.iterrows():
+            direction = row["direction"]
+            demand_by_direction[direction] = float(row[prediction_column])
+
+        return demand_by_direction
+
+    @staticmethod
+    def _capacity_by_direction(
+        intersection_rows: pd.DataFrame,
+    ) -> Dict[str, float]:
+        capacity_by_direction = {
+            direction: 1.0
+            for direction in DIRECTIONS
+        }
+
+        for _, row in intersection_rows.iterrows():
+            direction = row["direction"]
+
+            weather_capacity = float(row["weather_capacity_multiplier"])
+            accident_active = int(row["accident_active"])
+            accident_capacity = 0.5 if accident_active == 1 else 1.0
+
+            capacity_by_direction[direction] = (
+                weather_capacity * accident_capacity
+            )
+
+        return capacity_by_direction
+
+class ScipyMPCController(BaseTrafficController):
+    """
+    Real-time constrained optimization controller.
+
+    For each intersection and simulation step, this controller solves
+    a small one-dimensional optimization problem:
+
+        choose NS green time
+        EW green = available green - NS green
+
+    Objective:
+        minimize expected post-service queues
+        + large-queue penalty
+        + queue imbalance penalty
+
+    This gives a lightweight model predictive control style optimizer.
+    """
+
+    name = "scipy_mpc"
+
+    def __init__(
+        self,
+        queue_weight: float = MPC_QUEUE_WEIGHT,
+        squared_queue_weight: float = MPC_SQUARED_QUEUE_WEIGHT,
+        imbalance_weight: float = MPC_IMBALANCE_WEIGHT,
+        prediction_weight: float = MPC_PREDICTION_WEIGHT,
+        min_green: float = MPC_MIN_GREEN,
+        max_green: float = MPC_MAX_GREEN,
+    ):
+        self.queue_weight = queue_weight
+        self.squared_queue_weight = squared_queue_weight
+        self.imbalance_weight = imbalance_weight
+        self.prediction_weight = prediction_weight
+        self.min_green = min_green
+        self.max_green = max_green
+
+    def get_green_times(
+        self,
+        time_step: int,
+        num_intersections: int,
+        step_demand: pd.DataFrame,
+        simulator_state: Dict | None = None,
+    ) -> ControllerDecision:
+        if simulator_state is None:
+            simulator_state = {}
+
+        queues = simulator_state.get("queues", {})
+
+        green_times = {}
+
+        for intersection_id in range(num_intersections):
+            intersection_rows = step_demand[
+                step_demand["intersection_id"] == intersection_id
+            ]
+
+            demand_by_direction = self._predicted_demand_by_direction(
+                intersection_rows
+            )
+
+            capacity_by_direction = self._capacity_by_direction(
+                intersection_rows
+            )
+
+            ns_queue = queues.get(intersection_id, {}).get("NS", 0)
+            ew_queue = queues.get(intersection_id, {}).get("EW", 0)
+
+            ns_green = self._optimize_intersection_green(
+                ns_queue=ns_queue,
+                ew_queue=ew_queue,
+                predicted_ns=demand_by_direction["NS"],
+                predicted_ew=demand_by_direction["EW"],
+                ns_capacity_multiplier=capacity_by_direction["NS"],
+                ew_capacity_multiplier=capacity_by_direction["EW"],
+            )
+
+            green_times[intersection_id] = self._safe_two_direction_split_custom(
+                ns_green=ns_green,
+                min_green=self.min_green,
+                max_green=self.max_green,
+            )
+
+        return ControllerDecision(
+            green_times=green_times,
+            controller_name=self.name,
+            allow_actuated_reallocation=True,
+        )
+
+    def _optimize_intersection_green(
+        self,
+        ns_queue: float,
+        ew_queue: float,
+        predicted_ns: float,
+        predicted_ew: float,
+        ns_capacity_multiplier: float,
+        ew_capacity_multiplier: float,
+    ) -> float:
+        """
+        Optimize NS green time for one intersection.
+        """
+        available = self.available_green_time()
+
+        lower_bound = self.min_green
+        upper_bound = min(self.max_green, available - self.min_green)
+
+        ns_capacity_multiplier = max(ns_capacity_multiplier, 1e-6)
+        ew_capacity_multiplier = max(ew_capacity_multiplier, 1e-6)
+
+        def objective(ns_green: float) -> float:
+            ew_green = available - ns_green
+
+            ns_service_capacity = (
+                ns_green
+                * BASE_SERVICE_RATE
+                * ns_capacity_multiplier
+            )
+
+            ew_service_capacity = (
+                ew_green
+                * BASE_SERVICE_RATE
+                * ew_capacity_multiplier
+            )
+
+            ns_expected_arrivals = self.prediction_weight * predicted_ns
+            ew_expected_arrivals = self.prediction_weight * predicted_ew
+
+            ns_after = max(
+                0.0,
+                ns_queue + ns_expected_arrivals - ns_service_capacity,
+            )
+
+            ew_after = max(
+                0.0,
+                ew_queue + ew_expected_arrivals - ew_service_capacity,
+            )
+
+            total_queue_penalty = self.queue_weight * (
+                ns_after + ew_after
+            )
+
+            large_queue_penalty = self.squared_queue_weight * (
+                ns_after**2 + ew_after**2
+            )
+
+            imbalance_penalty = self.imbalance_weight * abs(
+                ns_after - ew_after
+            )
+
+            return (
+                total_queue_penalty
+                + large_queue_penalty
+                + imbalance_penalty
+            )
+
+        result = minimize_scalar(
+            objective,
+            bounds=(lower_bound, upper_bound),
+            method="bounded",
+            options={"xatol": MPC_OPTIMIZER_XTOL},
+        )
+
+        if not result.success:
+            # Safe fallback to pressure split.
+            total_pressure = (
+                ns_queue
+                + predicted_ns
+                + ew_queue
+                + predicted_ew
+                + 1e-6
+            )
+
+            ns_share = (ns_queue + predicted_ns) / total_pressure
+            return available * ns_share
+
+        return float(result.x)
 
     @staticmethod
     def _predicted_demand_by_direction(

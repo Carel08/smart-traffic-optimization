@@ -31,6 +31,7 @@ from src.controllers import (
     FixedCalibratedController,
     AdaptivePressureController,
     EnhancedAdaptiveController,
+    ScipyMPCController,
     GATimingPlanController,
 )
 from src.event_log import EventLogger
@@ -1165,6 +1166,25 @@ def run_ga_timing_plan_simulation(
     controller = GATimingPlanController(
         timing_plan=timing_plan,
     )
+
+    return run_simulation_with_controller(
+        num_intersections=num_intersections,
+        demand_df=demand_df,
+        controller=controller,
+        scenario=scenario,
+        enable_emergency_priority=enable_emergency_priority,
+    )
+
+def run_scipy_mpc_simulation(
+    num_intersections: int,
+    demand_df: pd.DataFrame,
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
+) -> Dict[str, object]:
+    """
+    Run Scipy/MPC real-time optimization controller.
+    """
+    controller = ScipyMPCController()
 
     return run_simulation_with_controller(
         num_intersections=num_intersections,

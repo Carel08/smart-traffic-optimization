@@ -26,6 +26,7 @@ from src.simulator import (
     run_fixed_calibrated_simulation,
     run_adaptive_simulation,
     run_enhanced_adaptive_simulation,
+    run_scipy_mpc_simulation,
     run_ga_timing_plan_simulation,
 )
 from src.benchmark import run_ga_scenario_benchmark
@@ -72,6 +73,7 @@ def parse_args():
             "fixed_calibrated",
             "adaptive",
             "enhanced_adaptive",
+            "scipy_mpc",
             "ga",
             "rl_experimental",
         ],
@@ -240,7 +242,11 @@ def main():
 
     needs_ml_predictions = (
             args.train_model
-            or args.controller in ["adaptive", "enhanced_adaptive"]
+            or args.controller in [
+                "adaptive",
+                "enhanced_adaptive",
+                "scipy_mpc",
+            ]
             or args.benchmark
             or args.tune_adaptive
             or args.tune_enhanced_adaptive
@@ -296,8 +302,16 @@ def main():
         simulation_minutes=args.duration,
         scenario=args.scenario,
     )
-    if (args.controller in ["adaptive", "enhanced_adaptive"] or
-            args.benchmark or args.tune_adaptive or args.tune_enhanced_adaptive):
+    if (
+            args.controller in [
+        "adaptive",
+        "enhanced_adaptive",
+        "scipy_mpc",
+    ]
+            or args.benchmark
+            or args.tune_adaptive
+            or args.tune_enhanced_adaptive
+    ):
         print("Adding ML predictions to simulation demand...")
         demand_df = add_predictions_to_demand(
             demand_df=demand_df,
@@ -431,6 +445,14 @@ def main():
     elif args.controller == "enhanced_adaptive":
         print("Running enhanced adaptive controller simulation...")
         result = run_enhanced_adaptive_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+    elif args.controller == "scipy_mpc":
+        print("Running Scipy MPC controller simulation...")
+        result = run_scipy_mpc_simulation(
             num_intersections=args.num_intersections,
             demand_df=demand_df,
             scenario=args.scenario,
