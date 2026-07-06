@@ -1,0 +1,9 @@
+time_step,event_type,message,severity
+35,emergency_dispatch,"Emergency vehicle dispatched from intersection 0 to 9. Route selected: [0, 1, 5, 9].",warning
+35,emergency_no_priority,Emergency vehicle delayed at intersection 0; priority mode disabled.,warning
+36,emergency_no_priority,Emergency vehicle delayed at intersection 0; priority mode disabled.,warning
+37,emergency_no_priority,Emergency vehicle delayed at intersection 1; priority mode disabled.,warning
+38,emergency_no_priority,Emergency vehicle delayed at intersection 1; priority mode disabled.,warning
+39,emergency_no_priority,Emergency vehicle delayed at intersection 5; priority mode disabled.,warning
+40,emergency_no_priority,Emergency vehicle delayed at intersection 5; priority mode disabled.,warning
+41,emergency_complete,Emergency vehicle reached destination. Total emergency delay: 188.8 seconds.,success

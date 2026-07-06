@@ -1,8 +1,6 @@
 """
 Streamlit demo for Smart City Traffic Light Optimization.
 
-For Phase 1, this only creates the basic UI shell.
-Later, it will run the simulation and visualize results.
 """
 
 import streamlit as st
@@ -55,9 +53,19 @@ def main():
 
     scenario = st.sidebar.selectbox(
         "Scenario",
-        ["normal", "rain", "accident", "pedestrian", "emergency", "combined"],
+        [
+            "normal",
+            "rain",
+            "accident",
+            "pedestrian",
+            "emergency",
+            "combined",
+        ],
     )
-
+    enable_emergency_priority = st.sidebar.checkbox(
+        "Enable emergency signal priority",
+        value=True,
+    )
     controller = st.sidebar.selectbox(
         "Controller",
         [
@@ -93,7 +101,8 @@ def main():
     col3.metric("Controller", controller)
     col4.metric("Duration", f"{duration} min")
 
-    st.info("Phase 1 setup successful. Simulation engine will be added next.")
+    st.info(" Metrics have been added")
+
 
     if st.button("Generate traffic demand preview"):
         demand_df = generate_traffic_demand(
@@ -134,12 +143,16 @@ def main():
             result = run_fixed_equal_simulation(
                 num_intersections=num_intersections,
                 demand_df=demand_df,
+                scenario=scenario,
+                enable_emergency_priority=enable_emergency_priority,
             )
 
         elif controller == "fixed_calibrated":
             result = run_fixed_calibrated_simulation(
                 num_intersections=num_intersections,
                 demand_df=demand_df,
+                scenario=scenario,
+                enable_emergency_priority=enable_emergency_priority,
             )
 
         elif controller == "adaptive":
@@ -165,6 +178,8 @@ def main():
             result = run_adaptive_simulation(
                 num_intersections=num_intersections,
                 demand_df=demand_df,
+                scenario=scenario,
+                enable_emergency_priority=enable_emergency_priority,
             )
 
         else:
@@ -176,7 +191,7 @@ def main():
         metrics = result["metrics"]
         history = result["history"]
 
-        st.subheader("Fixed Equal Timing Results")
+        st.subheader("Results")
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -191,6 +206,25 @@ def main():
         col6.metric("Ped Throughput", metrics.pedestrian_throughput)
         col7.metric("Max Ped Queue", metrics.pedestrian_max_queue)
         col8.metric("Final Ped Queue", metrics.pedestrian_final_queue)
+
+        st.subheader("Emergency Metrics")
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric(
+            "Emergency Delay",
+            f"{metrics.emergency_delay_seconds:.1f}s",
+        )
+
+        col2.metric(
+            "Preemptions",
+            metrics.emergency_preemptions,
+        )
+
+        col3.metric(
+            "Route Length",
+            metrics.emergency_route_length,
+        )
 
         st.subheader("Vehicle Queue Over Time")
         st.line_chart(
@@ -391,6 +425,23 @@ def main():
             tuning_df.head(10),
             x="queue_weight",
             y="avg_wait_seconds",
+        )
+    event_log = result.get("event_log")
+
+    if event_log is not None and not event_log.empty:
+        st.subheader("Event Log")
+        st.dataframe(event_log, use_container_width=True)
+
+    if "emergency_preemption_active" in history.columns:
+        st.subheader("Emergency Priority Activation")
+
+        st.line_chart(
+            history,
+            x="time_step",
+            y=[
+                "emergency_active",
+                "emergency_preemption_active",
+            ],
         )
 
 if __name__ == "__main__":

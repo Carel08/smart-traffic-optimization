@@ -52,7 +52,14 @@ def parse_args():
         "--scenario",
         type=str,
         default="normal",
-        choices=["normal", "rain", "accident", "pedestrian", "emergency", "combined"],
+        choices=[
+            "normal",
+            "rain",
+            "accident",
+            "pedestrian",
+            "emergency",
+            "combined",
+        ],
         help="Traffic scenario to simulate.",
     )
 
@@ -133,6 +140,12 @@ def parse_args():
         "--scenario-benchmark",
         action="store_true",
         help="Run fixed_equal vs GA across all scenarios.",
+    )
+
+    parser.add_argument(
+        "--disable-emergency-priority",
+        action="store_true",
+        help="Disable emergency signal preemption for comparison.",
     )
 
     return parser.parse_args()
@@ -396,24 +409,32 @@ def main():
         result = run_fixed_equal_simulation(
             num_intersections=args.num_intersections,
             demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
         )
     elif args.controller == "fixed_calibrated":
         print("Running fixed calibrated timing simulation...")
         result = run_fixed_calibrated_simulation(
             num_intersections=args.num_intersections,
             demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
         )
     elif args.controller == "adaptive":
         print("Running adaptive pressure controller simulation...")
         result = run_adaptive_simulation(
             num_intersections=args.num_intersections,
             demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
         )
     elif args.controller == "enhanced_adaptive":
         print("Running enhanced adaptive controller simulation...")
         result = run_enhanced_adaptive_simulation(
             num_intersections=args.num_intersections,
             demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
         )
     elif args.controller == "ga":
         print("Running GA black-box optimization...")
@@ -423,6 +444,8 @@ def main():
             demand_df=demand_df,
             population_size=args.ga_population_size,
             generations=args.ga_generations,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
         )
 
         result = ga_result["best_result"]
@@ -441,6 +464,13 @@ def main():
 
     metrics = result["metrics"]
     history = result["history"]
+
+    event_log = result.get("event_log")
+
+    if event_log is not None and not event_log.empty:
+        event_log_path = f"outputs/{args.controller}_event_log.csv"
+        event_log.to_csv(event_log_path, index=False)
+        print(f"Saved event log to {event_log_path}")
 
     print(f"\nSimulation Results: {args.controller}")
     print("-" * 50)
@@ -461,6 +491,15 @@ def main():
     print(f"Average pedestrian queue     : {metrics.pedestrian_avg_queue:.2f}")
     print(f"Average pedestrian wait, sec : {metrics.pedestrian_avg_wait_seconds:.2f}")
     print(f"Pedestrian wait, seconds     : {metrics.pedestrian_total_wait_seconds:.2f}")
+
+    print("\nEmergency Metrics")
+    print("-" * 50)
+    print(f"Emergency dispatched        : {metrics.emergency_dispatched}")
+    print(f"Emergency completed         : {metrics.emergency_completed}")
+    print(f"Emergency route length      : {metrics.emergency_route_length}")
+    print(f"Emergency delay, seconds    : {metrics.emergency_delay_seconds:.2f}")
+    print(f"Emergency preemptions       : {metrics.emergency_preemptions}")
+    print(f"Emergency completion step   : {metrics.emergency_completion_step}")
 
     history_output_path = f"outputs/{args.controller}_history.csv"
     history.to_csv(history_output_path, index=False)

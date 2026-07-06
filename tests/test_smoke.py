@@ -184,3 +184,31 @@ def test_controller_benchmark_runs():
     assert "controller" in comparison.columns
     assert "avg_wait_seconds" in comparison.columns
     assert comparison["controller"].nunique() >= 3
+
+def test_emergency_scenario_runs():
+    from src.data_generator import generate_traffic_demand
+    from src.simulator import run_adaptive_simulation
+
+    demand_df = generate_traffic_demand(
+        num_intersections=4,
+        simulation_minutes=80,
+        scenario="emergency",
+    )
+
+    result = run_adaptive_simulation(
+        num_intersections=4,
+        demand_df=demand_df,
+        scenario="emergency",
+        enable_emergency_priority=True,
+    )
+
+    metrics = result["metrics"]
+    history = result["history"]
+    event_log = result["event_log"]
+
+    assert metrics.total_arrivals >= 0
+    assert metrics.throughput >= 0
+    assert metrics.emergency_dispatched in [0, 1]
+    assert "emergency_active" in history.columns
+    assert "emergency_preemption_active" in history.columns
+    assert event_log is not None

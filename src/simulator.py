@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Dict, List
+import copy
 
 import numpy as np
 import pandas as pd
@@ -31,6 +32,11 @@ from src.controllers import (
     AdaptivePressureController,
     EnhancedAdaptiveController,
     GATimingPlanController,
+)
+from src.event_log import EventLogger
+from src.emergency import (
+    find_emergency_route,
+    infer_movement_direction,
 )
 
 from src.config import (
@@ -46,6 +52,19 @@ from src.config import (
     PEDESTRIAN_SERVICE_RATE,
     ENABLE_ACTUATED_REALLOCATION,
     MAX_REALLOCATED_GREEN_SECONDS,
+    EMERGENCY_SCENARIOS,
+    EMERGENCY_DISPATCH_STEP,
+    EMERGENCY_ORIGIN_INTERSECTION,
+    EMERGENCY_DESTINATION_INTERSECTION,
+    EMERGENCY_BASE_TRAVEL_TIME,
+    EMERGENCY_QUEUE_DELAY_WEIGHT,
+    EMERGENCY_ACCIDENT_PENALTY,
+    EMERGENCY_ROUTE_ADVANCE_STEPS,
+    EMERGENCY_PRIORITY_GREEN,
+    EMERGENCY_CONFLICT_GREEN,
+    EMERGENCY_PREEMPTION_DELAY_SECONDS,
+    EMERGENCY_NO_PRIORITY_BASE_DELAY_SECONDS,
+    EMERGENCY_NO_PRIORITY_QUEUE_DELAY_WEIGHT,
 )
 
 
@@ -71,6 +90,13 @@ class SimulationMetrics:
     pedestrian_avg_wait_seconds: float
     pedestrian_total_wait_seconds: float
 
+    emergency_dispatched: int = 0
+    emergency_completed: int = 0
+    emergency_route_length: int = 0
+    emergency_delay_seconds: float = 0.0
+    emergency_preemptions: int = 0
+    emergency_completion_step: int = -1
+
 
 class QueueTrafficSimulator:
     """
@@ -94,6 +120,8 @@ class QueueTrafficSimulator:
         num_intersections: int,
         demand_df: pd.DataFrame,
         service_rate: float = BASE_SERVICE_RATE,
+        scenario: str = "normal",
+        enable_emergency_priority: bool = True,
     ):
         self.num_intersections = num_intersections
         self.demand_df = demand_df.copy()
@@ -127,6 +155,21 @@ class QueueTrafficSimulator:
 
         self.history: List[Dict[str, float]] = []
 
+        self.scenario = scenario
+        self.enable_emergency_priority = enable_emergency_priority
+
+        self.event_logger = EventLogger()
+
+        # Emergency state
+        self.emergency_route = None
+        self.emergency_active = False
+        self.emergency_completed = False
+        self.emergency_dispatch_step = None
+        self.emergency_completion_step = -1
+        self.emergency_delay_seconds = 0.0
+        self.emergency_preemptions = 0
+        self.emergency_current_intersection = None
+
     def run(
             self,
             controller: BaseTrafficController,
@@ -155,6 +198,7 @@ class QueueTrafficSimulator:
         return {
             "metrics": metrics,
             "history": pd.DataFrame(self.history),
+            "event_log": self.get_event_log(),
         }
 
     def step(
@@ -177,6 +221,18 @@ class QueueTrafficSimulator:
             simulator_state=simulator_state,
         )
 
+        self._maybe_dispatch_emergency(
+            time_step=time_step,
+            step_demand=step_demand,
+        )
+
+        green_times = copy.deepcopy(decision.green_times)
+
+        emergency_info = self._apply_emergency_preemption(
+            time_step=time_step,
+            green_times_by_intersection=green_times,
+        )
+
         pedestrian_phase_by_intersection = self._pedestrian_phase_by_intersection(
             time_step=time_step,
         )
@@ -189,7 +245,7 @@ class QueueTrafficSimulator:
 
         self._discharge_vehicles(
             step_demand=step_demand,
-            green_times_by_intersection=decision.green_times,
+            green_times_by_intersection=green_times,
             pedestrian_phase_by_intersection=pedestrian_phase_by_intersection,
             allow_actuated_reallocation=decision.allow_actuated_reallocation,
         )
@@ -200,8 +256,9 @@ class QueueTrafficSimulator:
             time_step=time_step,
             pedestrian_phase_by_intersection=pedestrian_phase_by_intersection,
             controller_name=decision.controller_name,
-            green_times_by_intersection=decision.green_times,
+            green_times_by_intersection=green_times,
             allow_actuated_reallocation=decision.allow_actuated_reallocation,
+            emergency_info=emergency_info,
         )
 
     def get_state(self) -> Dict:
@@ -486,6 +543,7 @@ class QueueTrafficSimulator:
             controller_name: str,
             green_times_by_intersection: Dict[int, Dict[str, float]],
             allow_actuated_reallocation: bool,
+            emergency_info: Dict[str, object] | None = None,
     ) -> None:
         """
         Store time-series metrics for charts and Streamlit.
@@ -523,6 +581,12 @@ class QueueTrafficSimulator:
                 for i in range(self.num_intersections)
             ]
         )
+        if emergency_info is None:
+            emergency_info = {
+                "emergency_active": 0,
+                "emergency_preemption_active": 0,
+                "emergency_current_intersection": -1,
+            }
 
         self.history.append(
             {
@@ -545,6 +609,11 @@ class QueueTrafficSimulator:
                 "avg_ns_green": avg_ns_green,
                 "allow_actuated_reallocation": int(allow_actuated_reallocation),
                 "avg_ew_green": avg_ew_green,
+                "emergency_active": emergency_info["emergency_active"],
+                "emergency_preemption_active": emergency_info["emergency_preemption_active"],
+                "emergency_current_intersection": emergency_info["emergency_current_intersection"],
+                "emergency_delay_seconds": self.emergency_delay_seconds,
+                "emergency_preemptions": self.emergency_preemptions,
             }
         )
 
@@ -616,13 +685,243 @@ class QueueTrafficSimulator:
             pedestrian_avg_queue=float(pedestrian_avg_queue),
             pedestrian_avg_wait_seconds=pedestrian_avg_wait_seconds,
             pedestrian_total_wait_seconds=self.pedestrian_total_wait_seconds,
+            emergency_dispatched=int(self.emergency_route is not None),
+            emergency_completed=int(self.emergency_completed),
+            emergency_route_length=(
+                len(self.emergency_route)
+                if self.emergency_route is not None
+                else 0
+            ),
+            emergency_delay_seconds=self.emergency_delay_seconds,
+            emergency_preemptions=self.emergency_preemptions,
+            emergency_completion_step=self.emergency_completion_step,
         )
 
+    def get_event_log(self) -> pd.DataFrame:
+        return self.event_logger.to_dataframe()
+
+    def _scenario_supports_emergency(self) -> bool:
+        return self.scenario in EMERGENCY_SCENARIOS
+
+    def _accident_context_from_step(
+            self,
+            step_demand: pd.DataFrame,
+    ) -> Dict[str, object]:
+        """
+        Extract accident context from current demand frame.
+        """
+        accident_active = False
+        accident_intersection = None
+
+        if "accident_active" in step_demand.columns:
+            accident_active = int(step_demand["accident_active"].max()) == 1
+
+            if accident_active:
+                affected = step_demand[step_demand["accident_active"] == 1]
+                if not affected.empty:
+                    accident_intersection = int(
+                        affected["intersection_id"].iloc[0]
+                    )
+
+        return {
+            "accident_active": accident_active,
+            "accident_intersection": accident_intersection,
+        }
+
+    def _maybe_dispatch_emergency(
+            self,
+            time_step: int,
+            step_demand: pd.DataFrame,
+    ) -> None:
+        """
+        Dispatch emergency vehicle once during emergency scenario.
+        """
+        if not self._scenario_supports_emergency():
+            return
+
+        if self.emergency_route is not None:
+            return
+
+        if time_step != EMERGENCY_DISPATCH_STEP:
+            return
+
+        destination = (
+            self.num_intersections - 1
+            if EMERGENCY_DESTINATION_INTERSECTION is None
+            else EMERGENCY_DESTINATION_INTERSECTION
+        )
+
+        simulator_state = self.get_state()
+        simulator_state.update(
+            self._accident_context_from_step(step_demand)
+        )
+
+        route_result = find_emergency_route(
+            num_intersections=self.num_intersections,
+            origin=EMERGENCY_ORIGIN_INTERSECTION,
+            destination=destination,
+            simulator_state=simulator_state,
+            base_travel_time=EMERGENCY_BASE_TRAVEL_TIME,
+            queue_weight=EMERGENCY_QUEUE_DELAY_WEIGHT,
+            accident_penalty=EMERGENCY_ACCIDENT_PENALTY,
+        )
+
+        self.emergency_route = route_result.route
+        self.emergency_active = True
+        self.emergency_dispatch_step = time_step
+        self.emergency_current_intersection = route_result.route[0]
+
+        self.event_logger.log(
+            time_step=time_step,
+            event_type="emergency_dispatch",
+            message=(
+                f"Emergency vehicle dispatched from intersection "
+                f"{route_result.origin} to {route_result.destination}. "
+                f"Route selected: {route_result.route}."
+            ),
+            severity="warning",
+            dedupe_key="emergency_dispatch",
+        )
+
+    def _current_emergency_segment(
+            self,
+            time_step: int,
+    ) -> tuple[int, int] | None:
+        """
+        Return current route segment as (source, target).
+
+        Emergency vehicle advances one route segment every
+        EMERGENCY_ROUTE_ADVANCE_STEPS simulation steps.
+        """
+        if not self.emergency_active:
+            return None
+
+        if self.emergency_route is None:
+            return None
+
+        if self.emergency_completed:
+            return None
+
+        route_progress = (
+                (time_step - self.emergency_dispatch_step)
+                // EMERGENCY_ROUTE_ADVANCE_STEPS
+        )
+
+        if route_progress >= len(self.emergency_route) - 1:
+            self.emergency_completed = True
+            self.emergency_active = False
+            self.emergency_completion_step = time_step
+
+            self.event_logger.log(
+                time_step=time_step,
+                event_type="emergency_complete",
+                message=(
+                    "Emergency vehicle reached destination. "
+                    f"Total emergency delay: "
+                    f"{self.emergency_delay_seconds:.1f} seconds."
+                ),
+                severity="success",
+                dedupe_key="emergency_complete",
+            )
+
+            return None
+
+        source = self.emergency_route[route_progress]
+        target = self.emergency_route[route_progress + 1]
+
+        self.emergency_current_intersection = source
+
+        return source, target
+
+    def _apply_emergency_preemption(
+            self,
+            time_step: int,
+            green_times_by_intersection: Dict[int, Dict[str, float]],
+    ) -> Dict[str, object]:
+        """
+        Override green times for the intersection currently used by the
+        emergency vehicle.
+
+        Returns event info for history logging.
+        """
+        info = {
+            "emergency_active": int(self.emergency_active),
+            "emergency_preemption_active": 0,
+            "emergency_current_intersection": -1,
+        }
+
+        segment = self._current_emergency_segment(time_step)
+
+        if segment is None:
+            return info
+
+        source, target = segment
+        direction = infer_movement_direction(
+            source=source,
+            target=target,
+            num_intersections=self.num_intersections,
+        )
+
+        info["emergency_current_intersection"] = source
+
+        if self.enable_emergency_priority:
+            if direction == "NS":
+                green_times_by_intersection[source] = {
+                    "NS": EMERGENCY_PRIORITY_GREEN,
+                    "EW": EMERGENCY_CONFLICT_GREEN,
+                }
+            else:
+                green_times_by_intersection[source] = {
+                    "NS": EMERGENCY_CONFLICT_GREEN,
+                    "EW": EMERGENCY_PRIORITY_GREEN,
+                }
+
+            self.emergency_preemptions += 1
+            self.emergency_delay_seconds += EMERGENCY_PREEMPTION_DELAY_SECONDS
+
+            info["emergency_preemption_active"] = 1
+
+            self.event_logger.log(
+                time_step=time_step,
+                event_type="emergency_preemption",
+                message=(
+                    f"Emergency signal preemption activated at intersection "
+                    f"{source}. Priority direction: {direction}."
+                ),
+                severity="warning",
+                dedupe_key=f"emergency_preemption_{time_step}_{source}",
+            )
+
+        else:
+            queue_delay = (
+                    sum(self.queues[source].values())
+                    * EMERGENCY_NO_PRIORITY_QUEUE_DELAY_WEIGHT
+            )
+
+            self.emergency_delay_seconds += (
+                    EMERGENCY_NO_PRIORITY_BASE_DELAY_SECONDS
+                    + queue_delay
+            )
+
+            self.event_logger.log(
+                time_step=time_step,
+                event_type="emergency_no_priority",
+                message=(
+                    f"Emergency vehicle delayed at intersection {source}; "
+                    "priority mode disabled."
+                ),
+                severity="warning",
+                dedupe_key=f"emergency_no_priority_{time_step}_{source}",
+            )
+
+        return info
 
 def run_simulation_with_controller(
     num_intersections: int,
     demand_df: pd.DataFrame,
     controller: BaseTrafficController,
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
 ) -> Dict[str, object]:
     """
     Convenience function to run any controller.
@@ -630,6 +929,8 @@ def run_simulation_with_controller(
     simulator = QueueTrafficSimulator(
         num_intersections=num_intersections,
         demand_df=demand_df,
+        scenario=scenario,
+        enable_emergency_priority=enable_emergency_priority,
     )
 
     return simulator.run(controller=controller)
@@ -638,22 +939,24 @@ def run_simulation_with_controller(
 def run_fixed_equal_simulation(
     num_intersections: int,
     demand_df: pd.DataFrame,
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
 ) -> Dict[str, object]:
-    """
-    Run fixed equal timing baseline.
-    """
     controller = FixedEqualController()
-
     return run_simulation_with_controller(
         num_intersections=num_intersections,
         demand_df=demand_df,
         controller=controller,
+        scenario=scenario,
+        enable_emergency_priority=enable_emergency_priority,
     )
 
 
 def run_fixed_calibrated_simulation(
     num_intersections: int,
     demand_df: pd.DataFrame,
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
 ) -> Dict[str, object]:
     """
     Run fixed calibrated timing baseline.
@@ -669,6 +972,8 @@ def run_fixed_calibrated_simulation(
         num_intersections=num_intersections,
         demand_df=demand_df,
         controller=controller,
+        scenario=scenario,
+        enable_emergency_priority=enable_emergency_priority,
     )
 
 def run_adaptive_simulation(
@@ -677,6 +982,8 @@ def run_adaptive_simulation(
     queue_weight: float = 1.0,
     prediction_weight: float = 1.0,
     pedestrian_weight: float = 0.15,
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
 ) -> Dict[str, object]:
     """
     Run adaptive pressure-based controller.
@@ -691,6 +998,8 @@ def run_adaptive_simulation(
         num_intersections=num_intersections,
         demand_df=demand_df,
         controller=controller,
+        scenario=scenario,
+        enable_emergency_priority=enable_emergency_priority,
     )
 
 def run_enhanced_adaptive_simulation(
@@ -701,6 +1010,8 @@ def run_enhanced_adaptive_simulation(
     pedestrian_weight: float = 0.1,
     pressure_exponent: float = 2.0,
     adaptive_min_green: float = 5.0,
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
 ) -> Dict[str, object]:
     """
     Run enhanced adaptive pressure-based controller.
@@ -717,12 +1028,16 @@ def run_enhanced_adaptive_simulation(
         num_intersections=num_intersections,
         demand_df=demand_df,
         controller=controller,
+        scenario=scenario,
+        enable_emergency_priority=enable_emergency_priority,
     )
 
 def run_ga_timing_plan_simulation(
     num_intersections: int,
     demand_df: pd.DataFrame,
     timing_plan: Dict[str, Dict[int, Dict[str, float]]],
+    scenario: str = "normal",
+    enable_emergency_priority: bool = True,
 ) -> Dict[str, object]:
     """
     Run GA-optimized timing plan.
@@ -735,4 +1050,6 @@ def run_ga_timing_plan_simulation(
         num_intersections=num_intersections,
         demand_df=demand_df,
         controller=controller,
+        scenario=scenario,
+        enable_emergency_priority=enable_emergency_priority,
     )
