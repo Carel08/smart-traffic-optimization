@@ -2,7 +2,7 @@
 CLI entry point for the Smart Traffic Light Optimization project.
 
 This file will later run the full simulation benchmark.
-For Phase 1, it only confirms that the project is wired correctly.
+
 """
 
 import argparse
@@ -35,7 +35,10 @@ from src.config import (
     MAX_NUM_INTERSECTIONS,
     DEFAULT_SIMULATION_MINUTES,
 )
-
+from src.reporting import (
+    build_final_results_table,
+    save_final_results_charts,
+)
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -149,6 +152,13 @@ def parse_args():
         action="store_true",
         help="Disable emergency signal preemption for comparison.",
     )
+
+    parser.add_argument(
+        "--final-report",
+        action="store_true",
+        help="Run final presentation-ready benchmark report.",
+    )
+
 
     return parser.parse_args()
 
@@ -486,6 +496,74 @@ def main():
 
     metrics = result["metrics"]
     history = result["history"]
+
+    if args.final_report:
+        print("\nRunning final benchmark report...")
+
+        final_results = {}
+
+        fixed_equal_result = run_fixed_equal_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["fixed_equal"] = fixed_equal_result
+
+        fixed_calibrated_result = run_fixed_calibrated_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["fixed_calibrated"] = fixed_calibrated_result
+
+        adaptive_result = run_adaptive_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["adaptive"] = adaptive_result
+
+        scipy_mpc_result = run_scipy_mpc_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["scipy_mpc"] = scipy_mpc_result
+
+        print("\nRunning GA for final report...")
+        ga_result = optimize_ga_timing_plan(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            population_size=args.ga_population_size,
+            generations=args.ga_generations,
+        )
+        final_results["ga"] = ga_result["best_result"]
+
+        summary_df = build_final_results_table(
+            results=final_results,
+            baseline_controller="fixed_equal",
+        )
+
+        print("\nFinal Results Summary")
+        print("-" * 100)
+        print(summary_df.to_string(index=False))
+
+        summary_path = "outputs/final_results_summary.csv"
+        summary_df.to_csv(summary_path, index=False)
+
+        save_final_results_charts(
+            summary_df=summary_df,
+            output_dir="outputs/charts",
+        )
+
+        print(f"\nSaved final results to {summary_path}")
+        print("Saved charts to outputs/charts/")
+
+        return
 
     event_log = result.get("event_log")
 
