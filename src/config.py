@@ -21,29 +21,29 @@ DEFAULT_RANDOM_SEED = 42
 # Vehicle flow assumptions
 BASE_SERVICE_RATE = 1.0  # vehicles released per second during green
 
-# Pedestrian assumptions
-PEDESTRIAN_WAIT_THRESHOLD = 10
-
-# Pedestrian fairness assumptions
+# Pedestrian fairness assumptions - balanced v2
 PEDESTRIAN_CROSSING_TIME = 10
-PEDESTRIAN_SERVICE_RATE = 1.6
+
+# Aggregate crossing capacity across multiple crosswalks at an intersection.
+# Example: 10 seconds × 4 pedestrians/second = 40 pedestrians.
+PEDESTRIAN_SERVICE_RATE = 4.0
 
 # Normal queue trigger for pedestrian phase
-PEDESTRIAN_PHASE_TRIGGER = 35
+PEDESTRIAN_PHASE_TRIGGER = 80
 
 # Hard fairness trigger
-PEDESTRIAN_FORCE_CROSSING_QUEUE = 120
-PEDESTRIAN_MAX_WAIT_SECONDS = 300
+PEDESTRIAN_FORCE_CROSSING_QUEUE = 160
+PEDESTRIAN_MAX_WAIT_SECONDS = 360
 
 # Minimum number of simulation steps between pedestrian crossings
 # at the same intersection.
-PEDESTRIAN_MIN_GAP_STEPS = 4
+PEDESTRIAN_MIN_GAP_STEPS = 6
 
-# Fairness enabled, but no longer overly aggressive.
 ENABLE_PEDESTRIAN_FAIRNESS = True
 
 # Used in summary metrics
 PEDESTRIAN_TARGET_AVG_WAIT_SECONDS = 180
+
 
 # Emergency vehicle assumptions
 EMERGENCY_PRIORITY_LOOKAHEAD = 2

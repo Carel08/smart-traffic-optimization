@@ -1,628 +1,201 @@
 time_step,event_type,message,severity
-1,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-1,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-3,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-4,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-5,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-6,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 2400s.",info
-6,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-6,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 2400s.",info
-6,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 2400s.",info
-7,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-7,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-7,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-7,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-7,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-7,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 19, estimated oldest wait: 1200s.",info
-8,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-8,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-8,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 2400s.",info
-8,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-8,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-8,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 2400s.",info
-9,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-9,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-9,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-9,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-9,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-10,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-10,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-10,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-10,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-10,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-11,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-11,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-11,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-11,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-11,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-12,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-12,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-12,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 23, estimated oldest wait: 1200s.",info
-12,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-12,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-13,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-13,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 20, estimated oldest wait: 1200s.",info
-13,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-13,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 2400s.",info
-13,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-13,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-13,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-14,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-14,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 2400s.",info
-14,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 3600s.",info
-14,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-14,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-15,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-15,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-15,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-15,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-15,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-16,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-16,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-16,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 2400s.",info
-16,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-16,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-16,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-17,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-17,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-17,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-17,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-18,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-18,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-18,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-18,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-18,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-18,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-19,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-19,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-19,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-19,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-20,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 19, estimated oldest wait: 1200s.",info
-20,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-20,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-20,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-20,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-20,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-21,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 3, estimated oldest wait: 2400s.",info
-21,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-21,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-21,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-21,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-21,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-21,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-22,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-22,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-22,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-23,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-23,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-23,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-23,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-23,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-23,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-23,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-24,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-24,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-24,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-24,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-25,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-25,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-25,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-25,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-25,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-25,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-26,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-26,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-26,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 3, estimated oldest wait: 1200s.",info
-26,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-27,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-27,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-27,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 2400s.",info
-27,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-27,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-27,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-27,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-28,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 2400s.",info
-28,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 20, estimated oldest wait: 1200s.",info
-28,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-28,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 2400s.",info
-28,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-29,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-29,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 2400s.",info
-29,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-29,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-29,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 21, estimated oldest wait: 1200s.",info
-29,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-30,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-30,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-30,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-30,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 2400s.",info
-30,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-31,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-31,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-31,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-31,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-31,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-32,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-32,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-32,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-32,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-32,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-33,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-33,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-33,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-33,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-33,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-34,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-34,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-34,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-34,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-34,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-35,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-35,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-35,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-35,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-36,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-36,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-36,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-36,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-36,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-36,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-37,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-37,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-37,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-37,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-38,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-38,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-38,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-38,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-38,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-38,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-39,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-39,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-39,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 19, estimated oldest wait: 1200s.",info
-39,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-40,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-40,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-40,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-40,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-40,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-40,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-40,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-41,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-41,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-41,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-42,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-42,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-42,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-42,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-42,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-42,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-42,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 20, estimated oldest wait: 1200s.",info
-43,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-43,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-43,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-43,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-44,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-44,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-44,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-44,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-44,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-44,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-45,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-45,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-45,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 4, estimated oldest wait: 1200s.",info
-45,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-46,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-46,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-46,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-46,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-46,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-46,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-47,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-47,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-47,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 2400s.",info
-47,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-47,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-48,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-48,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-48,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-48,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-48,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-49,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-49,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-49,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-49,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-49,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-50,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-50,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-50,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-50,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-50,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-50,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-51,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-51,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-51,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-51,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-52,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-52,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-52,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-52,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-52,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-52,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-53,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-53,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-53,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 2400s.",info
-53,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-53,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-54,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-54,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-54,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 22, estimated oldest wait: 1200s.",info
-54,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-54,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-55,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-55,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-55,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 2400s.",info
-55,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-55,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-55,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-56,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-56,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-56,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-56,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-57,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-57,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-57,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-57,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-57,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-57,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-58,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-58,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 4, estimated oldest wait: 1200s.",info
-58,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-58,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-59,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-59,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-59,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-59,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-59,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-59,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-60,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-60,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-60,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 4, estimated oldest wait: 2400s.",info
-60,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-60,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-60,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 4, estimated oldest wait: 2400s.",info
-61,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-61,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-61,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-61,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-62,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 2400s.",info
-62,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-62,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-62,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-62,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-62,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-62,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-63,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 2400s.",info
-63,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-63,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-63,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-64,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-64,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-64,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-64,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-64,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-64,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-65,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-65,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-65,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-65,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-65,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-66,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-66,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-66,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-66,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-66,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-67,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-67,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-67,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-67,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-67,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-68,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-68,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-68,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 22, estimated oldest wait: 1200s.",info
-68,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-68,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 19, estimated oldest wait: 1200s.",info
-68,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-69,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-69,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-69,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 2400s.",info
-69,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 2400s.",info
-69,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-69,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-70,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-70,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-70,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-70,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-71,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-71,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-71,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-71,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-71,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-71,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-71,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-72,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-72,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 2400s.",info
-72,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 2400s.",info
-72,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-72,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-73,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-73,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-73,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-73,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-73,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-74,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-74,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-74,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-74,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-74,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-75,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-75,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-75,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-75,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-75,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-76,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-76,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-76,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-76,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-76,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-76,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-77,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-77,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-77,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-77,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-78,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 4, estimated oldest wait: 1200s.",info
-78,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-78,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-78,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-78,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-78,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-79,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-79,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-79,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-79,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-80,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-80,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-80,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-80,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-80,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 19, estimated oldest wait: 1200s.",info
-80,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-81,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 2400s.",info
-81,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 2400s.",info
-81,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-81,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-81,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-81,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-82,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-82,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-82,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-82,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 19, estimated oldest wait: 1200s.",info
-83,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-83,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-83,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-83,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-83,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 2400s.",info
-83,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-83,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-84,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-84,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-84,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-85,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-85,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-85,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-85,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-85,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-85,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-85,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-86,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-86,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-86,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-87,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-87,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-87,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-87,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-87,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-87,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-87,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-87,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-88,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-88,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-89,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-89,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 21, estimated oldest wait: 1200s.",info
-89,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-89,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-89,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 20, estimated oldest wait: 1200s.",info
-89,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-89,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-89,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-90,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-90,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 2400s.",info
-90,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-90,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 2400s.",info
-91,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 23, estimated oldest wait: 1200s.",info
-91,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-91,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-91,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-91,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-91,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-92,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 2400s.",info
-92,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-92,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-92,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-92,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-93,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-93,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-93,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-93,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-93,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-94,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-94,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-94,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-94,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 4, estimated oldest wait: 1200s.",info
-94,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 21, estimated oldest wait: 1200s.",info
-95,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-95,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-95,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-95,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-95,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-95,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-95,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-96,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 20, estimated oldest wait: 1200s.",info
-96,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-96,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 2400s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-97,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-98,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 19, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-99,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-100,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-100,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-101,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-101,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-101,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-101,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-101,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-101,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-101,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-101,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-102,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-102,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-102,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-103,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-103,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-103,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-103,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-103,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-103,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-103,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-104,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-104,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-104,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-105,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-105,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-105,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-105,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-105,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 2400s.",info
-105,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-105,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-105,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-106,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-106,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-107,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-108,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-108,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 2400s.",info
-109,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-109,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-109,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-109,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-109,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-109,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-109,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-109,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 1200s.",info
-110,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 19, estimated oldest wait: 1200s.",info
-110,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 2400s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-111,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-112,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-113,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-114,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 5, estimated oldest wait: 2400s.",info
-114,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-115,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 1200s.",info
-115,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-115,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-115,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-115,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 4, estimated oldest wait: 1200s.",info
-115,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-115,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 17, estimated oldest wait: 1200s.",info
-115,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-116,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-116,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-116,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 6, estimated oldest wait: 2400s.",info
-117,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 13, estimated oldest wait: 1200s.",info
-117,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 16, estimated oldest wait: 1200s.",info
-117,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 15, estimated oldest wait: 1200s.",info
-117,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
-117,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-117,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-117,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-118,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-118,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max pedestrian wait exceeded. Queue: 10, estimated oldest wait: 1200s.",info
-118,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max pedestrian wait exceeded. Queue: 12, estimated oldest wait: 1200s.",info
-119,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max pedestrian wait exceeded. Queue: 8, estimated oldest wait: 1200s.",info
-119,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max pedestrian wait exceeded. Queue: 9, estimated oldest wait: 1200s.",info
-119,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max pedestrian wait exceeded. Queue: 14, estimated oldest wait: 1200s.",info
-119,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max pedestrian wait exceeded. Queue: 7, estimated oldest wait: 1200s.",info
-119,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-119,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max pedestrian wait exceeded. Queue: 18, estimated oldest wait: 1200s.",info
-119,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max pedestrian wait exceeded. Queue: 11, estimated oldest wait: 1200s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 7, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 8, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 4, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 5, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 5, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 5, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 4, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 6, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 7, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 5, time since service: 600000s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 42, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 26, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 41, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 44, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 46, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 43, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 45, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 43, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 42, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 46, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 27, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 42, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 28, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 48, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 28, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 49, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 42, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 27, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 53, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 48, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 20, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 53, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 44, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+30,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 43, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 43, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+36,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 26, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
+42,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 21, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 51, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
+48,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 63, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 23, time since service: 360s.",info
+54,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 26, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 60, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+60,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 46, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 57, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 29, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 42, time since service: 360s.",info
+66,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 41, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 43, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 68, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 46, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+72,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 27, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 28, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 65, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
+78,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 29, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 70, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 48, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+84,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 44, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 51, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 56, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 31, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 41, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
+90,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 28, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 45, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 56, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 28, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 51, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 29, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 48, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 28, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+96,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 47, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 45, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 40, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 52, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 27, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 28, time since service: 360s.",info
+102,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 39, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 27, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 44, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 43, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 47, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 53, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 45, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 28, time since service: 360s.",info
+108,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 27, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 49, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 4. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 5. Reason: max time since service exceeded. Queue: 36, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 6. Reason: max time since service exceeded. Queue: 49, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 32, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 45, time since service: 360s.",info
+114,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info

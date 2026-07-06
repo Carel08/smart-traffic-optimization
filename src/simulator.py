@@ -349,12 +349,14 @@ class QueueTrafficSimulator:
         """
         Decide pedestrian phase activation per intersection.
 
-        The base rule triggers when pedestrian queues exceed a normal threshold.
-        The fairness rule forces service if either:
-        - queue becomes very large
-        - oldest pedestrians have waited too long
+        Balanced policy:
+        - Trigger when pedestrian queue is meaningfully large.
+        - Force crossing if queue is very large.
+        - Force crossing if there has been no pedestrian service for too long.
+        - All triggers respect a minimum gap between crossings.
 
-        This prevents pedestrian starvation under vehicle-heavy scenarios.
+        This avoids pedestrian starvation without allowing pedestrian phases
+        to dominate vehicle flow.
         """
         phase_active = {}
 
@@ -362,27 +364,29 @@ class QueueTrafficSimulator:
             last_service_step = self.last_pedestrian_service_step[intersection_id]
 
             steps_since_service = time_step - last_service_step
-
             cooldown_passed = steps_since_service >= PEDESTRIAN_MIN_GAP_STEPS
+
+            estimated_wait_since_service_seconds = (
+                steps_since_service * SECONDS_PER_STEP
+                if queue > 0
+                else 0
+            )
 
             normal_trigger = (
                     queue >= PEDESTRIAN_PHASE_TRIGGER
                     and cooldown_passed
             )
 
-            estimated_oldest_wait_seconds = (
-                    self.pedestrian_queue_age_steps[intersection_id]
-                    * SECONDS_PER_STEP
-            )
-
             force_by_queue = (
                     ENABLE_PEDESTRIAN_FAIRNESS
                     and queue >= PEDESTRIAN_FORCE_CROSSING_QUEUE
+                    and cooldown_passed
             )
 
             force_by_wait = (
                     ENABLE_PEDESTRIAN_FAIRNESS
-                    and estimated_oldest_wait_seconds >= PEDESTRIAN_MAX_WAIT_SECONDS
+                    and estimated_wait_since_service_seconds >= PEDESTRIAN_MAX_WAIT_SECONDS
+                    and cooldown_passed
             )
 
             phase_active[intersection_id] = (
@@ -392,13 +396,13 @@ class QueueTrafficSimulator:
             )
 
             if phase_active[intersection_id]:
-                trigger_reason = "normal"
+                trigger_reason = "normal queue threshold"
 
                 if force_by_queue:
                     trigger_reason = "large pedestrian queue"
 
                 if force_by_wait:
-                    trigger_reason = "max pedestrian wait exceeded"
+                    trigger_reason = "max time since service exceeded"
 
                 self.event_logger.log(
                     time_step=time_step,
@@ -406,8 +410,8 @@ class QueueTrafficSimulator:
                     message=(
                         f"Pedestrian phase activated at intersection "
                         f"{intersection_id}. Reason: {trigger_reason}. "
-                        f"Queue: {queue}, estimated oldest wait: "
-                        f"{estimated_oldest_wait_seconds:.0f}s."
+                        f"Queue: {queue}, time since service: "
+                        f"{estimated_wait_since_service_seconds:.0f}s."
                     ),
                     severity="info",
                     dedupe_key=f"pedestrian_phase_{time_step}_{intersection_id}",
@@ -437,6 +441,7 @@ class QueueTrafficSimulator:
             self.pedestrian_queues[intersection_id] -= pedestrians_crossed
             self.pedestrian_throughput += pedestrians_crossed
             self.last_pedestrian_service_step[intersection_id] = time_step
+            self.pedestrian_queue_age_steps[intersection_id] = 0
 
             if self.pedestrian_queues[intersection_id] == 0:
                 self.pedestrian_queue_age_steps[intersection_id] = 0
@@ -661,15 +666,22 @@ class QueueTrafficSimulator:
             emergency_info = {
                 "emergency_active": 0,
                 "emergency_preemption_active": 0,
-                "emergency_current_intersection": -1,
+                       "emergency_current_intersection": -1,
             }
 
-        pedestrian_max_estimated_wait_seconds = (
-            max(self.pedestrian_queue_age_steps.values())
-            * SECONDS_PER_STEP
-            if self.pedestrian_queue_age_steps
-            else 0.0
-        )
+        pedestrian_max_estimated_wait_seconds = 0.0
+
+        for intersection_id, queue in self.pedestrian_queues.items():
+            if queue <= 0:
+                continue
+
+            last_service_step = self.last_pedestrian_service_step[intersection_id]
+            steps_since_service = time_step - last_service_step
+
+            pedestrian_max_estimated_wait_seconds = max(
+                pedestrian_max_estimated_wait_seconds,
+                steps_since_service * SECONDS_PER_STEP,
+            )
 
         self.pedestrian_max_estimated_wait_seconds_observed = max(
             self.pedestrian_max_estimated_wait_seconds_observed,
