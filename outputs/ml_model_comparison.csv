@@ -1,0 +1,4 @@
+model,MAE,RMSE,R2,selected,params
+HistGradientBoostingRegressor,1.9631813256104949,2.686800126669081,0.7914078980427461,True,"{'max_iter': 180, 'learning_rate': 0.03, 'max_leaf_nodes': 63, 'min_samples_leaf': 20, 'l2_regularization': 0.01}"
+RandomForestRegressor,2.6659831991477727,3.4489157763471425,0.6562898811195448,False,"{'n_estimators': 120, 'max_depth': 12, 'min_samples_leaf': 3, 'max_features': 0.8}"
+HistoricalAverage,5.9134210940931045,6.7206623860517665,-0.30512256470117793,False,{}

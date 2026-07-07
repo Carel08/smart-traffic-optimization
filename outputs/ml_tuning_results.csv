@@ -1,0 +1,9 @@
+model_type,model_name,validation_mae,validation_rmse,validation_r2,params
+hist_gradient_boosting,HistGradientBoostingRegressor,2.1368056069985353,2.5535936526358354,-0.30559988763923496,"{'max_iter': 180, 'learning_rate': 0.03, 'max_leaf_nodes': 63, 'min_samples_leaf': 20, 'l2_regularization': 0.01}"
+hist_gradient_boosting,HistGradientBoostingRegressor,2.153747801404291,2.5716802478326786,-0.3241599923402063,"{'max_iter': 100, 'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 20, 'l2_regularization': 0.0}"
+hist_gradient_boosting,HistGradientBoostingRegressor,2.2086634981283066,2.6221773594592808,-0.37667254141785933,"{'max_iter': 120, 'learning_rate': 0.08, 'max_leaf_nodes': 31, 'min_samples_leaf': 15, 'l2_regularization': 0.0}"
+hist_gradient_boosting,HistGradientBoostingRegressor,2.2332795808599655,2.6450564357406487,-0.4008008904002147,"{'max_iter': 150, 'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 20, 'l2_regularization': 0.01}"
+random_forest,RandomForestRegressor,2.5475153411671614,3.0247767182274576,-0.8318637425302102,"{'n_estimators': 120, 'max_depth': 12, 'min_samples_leaf': 3, 'max_features': 0.8}"
+random_forest,RandomForestRegressor,2.9493839194985982,3.4734759196538607,-1.4156561091407323,"{'n_estimators': 80, 'max_depth': 12, 'min_samples_leaf': 5, 'max_features': 0.8}"
+random_forest,RandomForestRegressor,3.0931846899263924,3.631362502520858,-1.6402541454270616,"{'n_estimators': 120, 'max_depth': None, 'min_samples_leaf': 5, 'max_features': 'sqrt'}"
+random_forest,RandomForestRegressor,3.3722995994870906,3.9581417162821153,-2.1368171428545812,"{'n_estimators': 60, 'max_depth': 8, 'min_samples_leaf': 5, 'max_features': 'sqrt'}"

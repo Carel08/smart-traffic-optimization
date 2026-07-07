@@ -93,24 +93,23 @@ def calculate_improvement(baseline_wait: float, model_wait: float) -> float:
     return (baseline_wait - model_wait) / baseline_wait * 100
 
 
-def generate_demand(num_intersections: int, duration: int, scenario: str) -> pd.DataFrame:
+def generate_demand(num_intersections: int,duration: int, scenario: str,start_hour: int,) -> pd.DataFrame:
     return generate_traffic_demand(
         num_intersections=num_intersections,
         simulation_minutes=duration,
         scenario=scenario,
+        start_hour=start_hour,
     )
 
 
-def train_predictor(
-    num_intersections: int,
-    training_days: int,
-    scenario: str,
-) -> Dict[str, Any]:
+@st.cache_data(show_spinner=False)
+def train_predictor( num_intersections: int,training_days: int,scenario: str,start_hour: int,) -> Dict[str, Any]:
     training_minutes = training_days * 24 * 60
     training_df = generate_traffic_demand(
         num_intersections=num_intersections,
         simulation_minutes=training_minutes,
         scenario=scenario,
+        start_hour=start_hour,
     )
     return train_and_evaluate_predictor(demand_df=training_df, test_size=0.2)
 
@@ -121,17 +120,14 @@ def add_ml_predictions_if_needed(
     num_intersections: int,
     training_days: int,
     scenario: str,
+    start_hour: int,
 ) -> tuple[pd.DataFrame, Optional[Dict[str, Any]]]:
     needs_predictions = controller in {"adaptive", "enhanced_adaptive", "scipy_mpc"}
 
     if not needs_predictions:
         return demand_df, None
 
-    ml_result = train_predictor(
-        num_intersections=num_intersections,
-        training_days=training_days,
-        scenario=scenario,
-    )
+    ml_result = train_predictor(num_intersections, training_days, scenario, start_hour)
 
     demand_with_predictions = add_predictions_to_demand(
         demand_df=demand_df,
@@ -150,7 +146,7 @@ def run_controller(
     training_days: int,
     ga_generations: int,
     ga_population_size: int,
-) -> Dict[str, Any]:
+    start_hour: int,) -> Dict[str, Any]:
     """Run one selected controller and return simulator result."""
     demand_for_run, ml_result = add_ml_predictions_if_needed(
         demand_df=demand_df,
@@ -158,7 +154,7 @@ def run_controller(
         num_intersections=num_intersections,
         training_days=training_days,
         scenario=scenario,
-    )
+        start_hour=start_hour,)
 
     if controller == "fixed_equal":
         result = run_fixed_equal_simulation(
@@ -260,8 +256,9 @@ def run_final_report(
     enable_emergency_priority: bool,
     ga_generations: int,
     ga_population_size: int,
+    start_hour: int,
 ) -> tuple[pd.DataFrame, Dict[str, Dict[str, Any]]]:
-    demand_df = generate_demand(num_intersections, duration, scenario)
+    demand_df = generate_demand(num_intersections, duration, scenario, start_hour)
 
     controllers = ["fixed_equal", "fixed_calibrated", "adaptive"]
     if run_scipy_mpc_simulation is not None:
@@ -280,6 +277,7 @@ def run_final_report(
             training_days=training_days,
             ga_generations=ga_generations,
             ga_population_size=ga_population_size,
+            start_hour=start_hour,
         )
 
     return build_summary_table(results), results
@@ -300,12 +298,54 @@ def show_dataframe_download(df: pd.DataFrame, label: str, filename: str) -> None
 
 
 def bar_chart(df: pd.DataFrame, x: str, y: str, title: str) -> None:
+    """
+    Render a robust bar chart.
+
+    This defensively converts the y-axis to numeric before plotting.
+    It prevents charts such as final_queue from rendering blank when the
+    dataframe column is stored as object/string after display, download,
+    or session-state operations.
+    """
+    if df is None or df.empty:
+        st.info(f"No data available for {title}.")
+        return
+
+    if x not in df.columns or y not in df.columns:
+        st.warning(f"Cannot plot {title}: missing '{x}' or '{y}' column.")
+        return
+
+    chart_df = df[[x, y]].copy()
+    chart_df[y] = pd.to_numeric(chart_df[y], errors="coerce")
+    chart_df = chart_df.dropna(subset=[x, y])
+
+    if chart_df.empty:
+        st.info(f"No numeric values available for {title}.")
+        return
+
     if px is not None:
-        fig = px.bar(df, x=x, y=y, title=title, text_auto=".2f")
-        fig.update_layout(xaxis_title=x.replace("_", " ").title(), yaxis_title=y.replace("_", " ").title())
+        fig = px.bar(
+            chart_df,
+            x=x,
+            y=y,
+            title=title,
+        )
+        fig.update_traces(
+            text=chart_df[y],
+            texttemplate="%{text:,.0f}",
+            textposition="outside",
+            cliponaxis=False,
+        )
+        fig.update_layout(
+            xaxis_title=x.replace("_", " ").title(),
+            yaxis_title=y.replace("_", " ").title(),
+            showlegend=False,
+            height=420,
+            margin=dict(t=70, b=80),
+        )
+        fig.update_yaxes(rangemode="tozero")
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.bar_chart(df, x=x, y=y)
+        st.bar_chart(chart_df, x=x, y=y)
 
 
 def line_chart(df: pd.DataFrame, x: str, y: list[str], title: str) -> None:
@@ -648,7 +688,7 @@ def render_network_replay(result: dict,num_intersections: int,) -> None:
     )
 
     speed_map = {
-        "Slow": 0.35,
+        "Slow": 0.45,
         "Medium": 0.18,
         "Fast": 0.08,
     }
@@ -749,8 +789,28 @@ def main() -> None:
             value=DEFAULT_SIMULATION_MINUTES,
             step=30,
         )
+        start_hour = st.selectbox(
+            "Simulation start time",
+            options=list(range(24)),
+            index=7,
+            format_func=lambda h: f"{h:02d}:00",
+            help=(
+                "Controls the starting hour of the simulated day. "
+                "Useful for comparing morning peak, lunch traffic, evening peak, and night traffic."
+            ),
+        )
 
-        training_days = st.slider("ML training days", min_value=1, max_value=7, value=1)
+        training_days = st.slider(
+            "Synthetic ML training history, days",
+            min_value=1,
+            max_value=7,
+            value=1,
+            help=(
+                "Controls how many synthetic historical days are generated for ML "
+                "model training and hyperparameter tuning. Higher values may improve "
+                "model stability but increase runtime."
+            ),
+        )
 
         st.divider()
         st.subheader("Emergency")
@@ -761,12 +821,13 @@ def main() -> None:
         ga_generations = st.slider("GA generations", min_value=5, max_value=40, value=20, step=5)
         ga_population_size = st.slider("GA population size", min_value=8, max_value=64, value=32, step=8)
 
-    config_cols = st.columns(5)
+    config_cols = st.columns(6)
     config_cols[0].metric("Intersections", num_intersections)
     config_cols[1].metric("Scenario", scenario)
     config_cols[2].metric("Controller", controller)
     config_cols[3].metric("Duration", f"{duration} min")
-    config_cols[4].metric("Training Days", training_days)
+    config_cols[4].metric("Start Time", f"{start_hour:02d}:00")
+    config_cols[5].metric("Training Days", training_days)
 
     st.info(
         "Recommended demo: Run `combined` with `ga`, then open Final Report. "
@@ -787,7 +848,7 @@ def main() -> None:
 
         if run_clicked:
             with st.spinner(f"Running {controller} controller on {scenario} scenario..."):
-                demand_df = generate_demand(num_intersections, duration, scenario)
+                demand_df = generate_demand(num_intersections, duration, scenario, start_hour)
                 result = run_controller(
                     controller=controller,
                     num_intersections=num_intersections,
@@ -797,6 +858,7 @@ def main() -> None:
                     training_days=training_days,
                     ga_generations=ga_generations,
                     ga_population_size=ga_population_size,
+                    start_hour=start_hour,
                 )
                 st.session_state["last_result"] = result
 
@@ -808,7 +870,7 @@ def main() -> None:
     with main_tabs[1]:
         if st.button("Generate demand preview", use_container_width=True):
             with st.spinner("Generating demand preview..."):
-                demand_df = generate_demand(num_intersections, duration, scenario)
+                demand_df = generate_demand(num_intersections, duration, scenario, start_hour)
                 st.session_state["last_demand_preview"] = demand_df
 
         if "last_demand_preview" in st.session_state:
@@ -818,50 +880,91 @@ def main() -> None:
 
     with main_tabs[2]:
         st.subheader("ML Demand Predictor Diagnostics")
+        st.caption(
+            "Compares the historical-average baseline, tuned Random Forest, "
+            "and tuned HistGradientBoosting models using a time-based split."
+        )
+
         if st.button("Train and evaluate ML predictor", use_container_width=True):
-            with st.spinner("Training Random Forest demand predictor..."):
-                ml_result = train_predictor(num_intersections, training_days, scenario)
+            with st.spinner("Training and tuning ML demand predictors..."):
+                ml_result = train_predictor(num_intersections, training_days, scenario, start_hour)
                 st.session_state["last_ml_result"] = ml_result
 
         if "last_ml_result" in st.session_state:
             ml_result = st.session_state["last_ml_result"]
-            baseline_eval = ml_result["baseline_evaluation"]
-            model_eval = ml_result["model_evaluation"]
-            feature_importance = ml_result["feature_importance"]
 
-            performance_df = pd.DataFrame(
-                [
-                    {
-                        "model": baseline_eval.model_name,
-                        "MAE": baseline_eval.mae,
-                        "RMSE": baseline_eval.rmse,
-                        "R2": baseline_eval.r2,
-                    },
-                    {
-                        "model": model_eval.model_name,
-                        "MAE": model_eval.mae,
-                        "RMSE": model_eval.rmse,
-                        "R2": model_eval.r2,
-                    },
-                ]
+            model_comparison = ml_result.get("model_comparison")
+            feature_importance = ml_result["feature_importance"]
+            selected_model_name = ml_result.get(
+                "selected_model_name",
+                "Unknown",
             )
+            selected_model_params = ml_result.get(
+                "selected_model_params",
+                {},
+            )
+            tuning_results = ml_result.get("tuning_results")
+
+            if model_comparison is not None:
+                performance_df = model_comparison.copy()
+            else:
+                # Backward-compatible fallback for the older predictor.py
+                # implementation.
+                baseline_eval = ml_result["baseline_evaluation"]
+                model_eval = ml_result["model_evaluation"]
+
+                performance_df = pd.DataFrame(
+                    [
+                        {
+                            "model": baseline_eval.model_name,
+                            "MAE": baseline_eval.mae,
+                            "RMSE": baseline_eval.rmse,
+                            "R2": baseline_eval.r2,
+                            "selected": False,
+                        },
+                        {
+                            "model": model_eval.model_name,
+                            "MAE": model_eval.mae,
+                            "RMSE": model_eval.rmse,
+                            "R2": model_eval.r2,
+                            "selected": True,
+                        },
+                    ]
+                )
+
+            st.subheader("Model Comparison")
+            st.dataframe(performance_df, use_container_width=True)
+
+            best_row = performance_df.sort_values("RMSE").iloc[0]
 
             cols = st.columns(3)
-            cols[0].metric("MAE Improvement", f"{baseline_eval.mae - model_eval.mae:.2f}")
-            rmse_improvement = (
-                (baseline_eval.rmse - model_eval.rmse) / baseline_eval.rmse * 100
-                if baseline_eval.rmse > 0
-                else 0.0
-            )
-            cols[1].metric("RMSE Improvement", format_pct(rmse_improvement))
-            cols[2].metric("Model R²", f"{model_eval.r2:.3f}")
+            cols[0].metric("Selected Model", selected_model_name)
+            cols[1].metric("Best RMSE", f"{best_row['RMSE']:.3f}")
+            cols[2].metric("Best R²", f"{best_row['R2']:.3f}")
 
-            st.dataframe(performance_df, use_container_width=True)
+            st.subheader("Selected Model Hyperparameters")
+            st.json(selected_model_params)
+
+            if tuning_results is not None and not tuning_results.empty:
+                st.subheader("Hyperparameter Tuning Results")
+                st.dataframe(tuning_results, use_container_width=True)
+                show_dataframe_download(
+                    tuning_results,
+                    "Download ML tuning results",
+                    "ml_tuning_results.csv",
+                )
+
             st.subheader("Feature Importance")
             st.dataframe(feature_importance.head(20), use_container_width=True)
-            bar_chart(feature_importance.head(12), "feature", "importance", "Top Feature Importances")
+            bar_chart(
+                feature_importance.head(12),
+                "feature",
+                "importance",
+                "Top Feature Importances",
+            )
         else:
-            st.info("Train the predictor to see performance and feature importance.")
+            st.info("Train the predictor to see model comparison and feature importance.")
+
 
     with main_tabs[3]:
         st.subheader("Final Benchmark Report")
@@ -879,6 +982,7 @@ def main() -> None:
                     enable_emergency_priority=enable_emergency_priority,
                     ga_generations=ga_generations,
                     ga_population_size=ga_population_size,
+                    start_hour=start_hour,
                 )
                 st.session_state["final_summary_df"] = summary_df
                 st.session_state["final_results"] = final_results
@@ -910,8 +1014,8 @@ def main() -> None:
             st.warning("tune_adaptive_controller is not available in this branch.")
         elif st.button("Tune adaptive controller", use_container_width=True):
             with st.spinner("Training predictor and tuning adaptive controller..."):
-                ml_result = train_predictor(num_intersections, training_days, scenario)
-                tuning_demand_df = generate_demand(num_intersections, duration, scenario)
+                ml_result = train_predictor(num_intersections, training_days, scenario, start_hour)
+                tuning_demand_df = generate_demand(num_intersections, duration, scenario, start_hour)
                 tuning_demand_df = add_predictions_to_demand(
                     demand_df=tuning_demand_df,
                     predictor=ml_result["predictor"],

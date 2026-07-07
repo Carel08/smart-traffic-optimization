@@ -61,9 +61,6 @@ time_step,event_type,message,severity
 30,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 37, time since service: 360s.",info
 30,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 33, time since service: 360s.",info
 30,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 38, time since service: 360s.",info
-35,emergency_dispatch,"Emergency vehicle dispatched from intersection 0 to 9. Route selected: [0, 4, 8, 9].",warning
-35,emergency_preemption,Emergency signal preemption activated at intersection 0. Priority direction: NS.,warning
-36,emergency_preemption,Emergency signal preemption activated at intersection 0. Priority direction: NS.,warning
 36,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
 36,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 49, time since service: 360s.",info
 36,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 30, time since service: 360s.",info
@@ -74,11 +71,6 @@ time_step,event_type,message,severity
 36,pedestrian_phase,"Pedestrian phase activated at intersection 7. Reason: max time since service exceeded. Queue: 29, time since service: 360s.",info
 36,pedestrian_phase,"Pedestrian phase activated at intersection 8. Reason: max time since service exceeded. Queue: 46, time since service: 360s.",info
 36,pedestrian_phase,"Pedestrian phase activated at intersection 9. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
-37,emergency_preemption,Emergency signal preemption activated at intersection 4. Priority direction: NS.,warning
-38,emergency_preemption,Emergency signal preemption activated at intersection 4. Priority direction: NS.,warning
-39,emergency_preemption,Emergency signal preemption activated at intersection 8. Priority direction: EW.,warning
-40,emergency_preemption,Emergency signal preemption activated at intersection 8. Priority direction: EW.,warning
-41,emergency_complete,Emergency vehicle reached destination. Total emergency delay: 30.0 seconds.,success
 42,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 34, time since service: 360s.",info
 42,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 46, time since service: 360s.",info
 42,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 35, time since service: 360s.",info

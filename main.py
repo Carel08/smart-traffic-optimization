@@ -282,21 +282,52 @@ def main():
         baseline_eval = ml_result["baseline_evaluation"]
         model_eval = ml_result["model_evaluation"]
         feature_importance = ml_result["feature_importance"]
+        model_comparison = ml_result.get("model_comparison")
+        tuning_results = ml_result.get("tuning_results")
+        selected_model_name = ml_result.get("selected_model_name")
+        selected_model_params = ml_result.get("selected_model_params")
 
         print("\nML Prediction Results")
-        print("-" * 50)
-        print(
-            f"{baseline_eval.model_name:25s} "
-            f"MAE={baseline_eval.mae:.3f} "
-            f"RMSE={baseline_eval.rmse:.3f} "
-            f"R2={baseline_eval.r2:.3f}"
-        )
-        print(
-            f"{model_eval.model_name:25s} "
-            f"MAE={model_eval.mae:.3f} "
-            f"RMSE={model_eval.rmse:.3f} "
-            f"R2={model_eval.r2:.3f}"
-        )
+        print("-" * 80)
+
+        if model_comparison is not None:
+            display_cols = [
+                "model",
+                "MAE",
+                "RMSE",
+                "R2",
+                "selected",
+            ]
+            print(model_comparison[display_cols].to_string(index=False))
+        else:
+            print(
+                f"{baseline_eval.model_name:25s} "
+                f"MAE={baseline_eval.mae:.3f} "
+                f"RMSE={baseline_eval.rmse:.3f} "
+                f"R2={baseline_eval.r2:.3f}"
+            )
+            print(
+                f"{model_eval.model_name:25s} "
+                f"MAE={model_eval.mae:.3f} "
+                f"RMSE={model_eval.rmse:.3f} "
+                f"R2={model_eval.r2:.3f}"
+            )
+
+        if selected_model_name is not None:
+            print("\nSelected ML Model")
+            print("-" * 50)
+            print(selected_model_name)
+            print(selected_model_params)
+
+        if tuning_results is not None and not tuning_results.empty:
+            tuning_results_path = "outputs/ml_tuning_results.csv"
+            tuning_results.to_csv(tuning_results_path, index=False)
+            print(f"\nSaved ML tuning results to {tuning_results_path}")
+
+        if model_comparison is not None:
+            model_comparison_path = "outputs/ml_model_comparison.csv"
+            model_comparison.to_csv(model_comparison_path, index=False)
+            print(f"Saved ML model comparison to {model_comparison_path}")
 
         print("\nTop 10 Feature Importances")
         print("-" * 50)
