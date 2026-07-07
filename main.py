@@ -27,9 +27,7 @@ from src.simulator import (
     run_adaptive_simulation,
     run_enhanced_adaptive_simulation,
     run_scipy_mpc_simulation,
-    run_ga_timing_plan_simulation,
 )
-from src.benchmark import run_ga_scenario_benchmark
 from src.config import (
     DEFAULT_NUM_INTERSECTIONS,
     MAX_NUM_INTERSECTIONS,
@@ -89,6 +87,14 @@ def parse_args():
         type=int,
         default=DEFAULT_SIMULATION_MINUTES,
         help="Simulation duration in minutes.",
+    )
+
+    parser.add_argument(
+        "--start-hour",
+        type=int,
+        default=7,
+        choices=list(range(24)),
+        help="Starting hour of the simulated day, from 0 to 23.",
     )
 
     parser.add_argument(
@@ -184,6 +190,7 @@ def main():
     print(f"Scenario      : {args.scenario}")
     print(f"Controller    : {args.controller}")
     print(f"Duration      : {args.duration} minutes")
+    print(f"Start Hour    : {args.start_hour:02d}:00")
     print("=" * 50)
     print("Project configuration loaded successfully.")
 
@@ -231,6 +238,7 @@ def main():
             num_intersections=args.num_intersections,
             simulation_minutes=args.duration,
             scenario=args.scenario,
+            start_hour=args.start_hour,
         )
 
         print("\nGenerated demand preview:")
@@ -261,6 +269,7 @@ def main():
             or args.benchmark
             or args.tune_adaptive
             or args.tune_enhanced_adaptive
+            or args.final_report
     )
 
     if needs_ml_predictions:
@@ -272,6 +281,7 @@ def main():
             num_intersections=args.num_intersections,
             simulation_minutes=training_minutes,
             scenario=args.scenario,
+            start_hour=args.start_hour,
         )
 
         ml_result = train_and_evaluate_predictor(
@@ -353,6 +363,7 @@ def main():
             or args.benchmark
             or args.tune_adaptive
             or args.tune_enhanced_adaptive
+            or args.final_report
     ):
         print("Adding ML predictions to simulation demand...")
         demand_df = add_predictions_to_demand(
@@ -411,7 +422,8 @@ def main():
             "pedestrian_avg_wait_seconds",
             "pedestrian_final_queue",
         ]
-        print(tuning_df[display_cols].head(10).to_string(index=False))
+        available_cols = [col for col in display_cols if col in tuning_df.columns]
+        print(tuning_df[available_cols].head(10).to_string(index=False))
 
         tuning_path = "outputs/adaptive_tuning_results.csv"
         tuning_df.to_csv(tuning_path, index=False)
@@ -451,12 +463,83 @@ def main():
             "pedestrian_final_queue",
         ]
 
-        print(tuning_df[display_cols].head(10).to_string(index=False))
+        available_cols = [col for col in display_cols if col in tuning_df.columns]
+        print(tuning_df[available_cols].head(10).to_string(index=False))
 
         tuning_path = "outputs/enhanced_adaptive_tuning_results.csv"
         tuning_df.to_csv(tuning_path, index=False)
 
         print(f"\nSaved enhanced tuning results to {tuning_path}")
+
+        return
+
+    if args.final_report:
+        print("\nRunning final benchmark report...")
+
+        final_results = {}
+
+        fixed_equal_result = run_fixed_equal_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["fixed_equal"] = fixed_equal_result
+
+        fixed_calibrated_result = run_fixed_calibrated_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["fixed_calibrated"] = fixed_calibrated_result
+
+        adaptive_result = run_adaptive_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["adaptive"] = adaptive_result
+
+        scipy_mpc_result = run_scipy_mpc_simulation(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["scipy_mpc"] = scipy_mpc_result
+
+        print("\nRunning GA for final report...")
+        ga_result = optimize_ga_timing_plan(
+            num_intersections=args.num_intersections,
+            demand_df=demand_df,
+            population_size=args.ga_population_size,
+            generations=args.ga_generations,
+            scenario=args.scenario,
+            enable_emergency_priority=not args.disable_emergency_priority,
+        )
+        final_results["ga"] = ga_result["best_result"]
+
+        summary_df = build_final_results_table(
+            results=final_results,
+            baseline_controller="fixed_equal",
+        )
+
+        print("\nFinal Results Summary")
+        print("-" * 100)
+        print(summary_df.to_string(index=False))
+
+        summary_path = "outputs/final_results_summary.csv"
+        summary_df.to_csv(summary_path, index=False)
+
+        save_final_results_charts(
+            summary_df=summary_df,
+            output_dir="outputs/charts",
+        )
+
+        print(f"\nSaved final results to {summary_path}")
+        print("Saved charts to outputs/charts/")
 
         return
 
@@ -528,74 +611,6 @@ def main():
 
     metrics = result["metrics"]
     history = result["history"]
-
-    if args.final_report:
-        print("\nRunning final benchmark report...")
-
-        final_results = {}
-
-        fixed_equal_result = run_fixed_equal_simulation(
-            num_intersections=args.num_intersections,
-            demand_df=demand_df,
-            scenario=args.scenario,
-            enable_emergency_priority=not args.disable_emergency_priority,
-        )
-        final_results["fixed_equal"] = fixed_equal_result
-
-        fixed_calibrated_result = run_fixed_calibrated_simulation(
-            num_intersections=args.num_intersections,
-            demand_df=demand_df,
-            scenario=args.scenario,
-            enable_emergency_priority=not args.disable_emergency_priority,
-        )
-        final_results["fixed_calibrated"] = fixed_calibrated_result
-
-        adaptive_result = run_adaptive_simulation(
-            num_intersections=args.num_intersections,
-            demand_df=demand_df,
-            scenario=args.scenario,
-            enable_emergency_priority=not args.disable_emergency_priority,
-        )
-        final_results["adaptive"] = adaptive_result
-
-        scipy_mpc_result = run_scipy_mpc_simulation(
-            num_intersections=args.num_intersections,
-            demand_df=demand_df,
-            scenario=args.scenario,
-            enable_emergency_priority=not args.disable_emergency_priority,
-        )
-        final_results["scipy_mpc"] = scipy_mpc_result
-
-        print("\nRunning GA for final report...")
-        ga_result = optimize_ga_timing_plan(
-            num_intersections=args.num_intersections,
-            demand_df=demand_df,
-            population_size=args.ga_population_size,
-            generations=args.ga_generations,
-        )
-        final_results["ga"] = ga_result["best_result"]
-
-        summary_df = build_final_results_table(
-            results=final_results,
-            baseline_controller="fixed_equal",
-        )
-
-        print("\nFinal Results Summary")
-        print("-" * 100)
-        print(summary_df.to_string(index=False))
-
-        summary_path = "outputs/final_results_summary.csv"
-        summary_df.to_csv(summary_path, index=False)
-
-        save_final_results_charts(
-            summary_df=summary_df,
-            output_dir="outputs/charts",
-        )
-
-        print(f"\nSaved final results to {summary_path}")
-        print("Saved charts to outputs/charts/")
-
-        return
 
     event_log = result.get("event_log")
 
