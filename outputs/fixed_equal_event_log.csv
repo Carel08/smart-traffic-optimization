@@ -1,0 +1,28 @@
+time_step,event_type,message,severity
+0,weather_change,Weather returned to clear conditions.,info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 2, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 3, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 4, time since service: 600000s.",info
+0,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 2, time since service: 600000s.",info
+3,weather_change,Light rain started. Demand is slightly higher and road capacity is reduced.,info
+4,weather_change,Weather returned to clear conditions.,info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 16, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 5, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 13, time since service: 360s.",info
+6,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 13, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 8, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 9, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 9, time since service: 360s.",info
+12,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 16, time since service: 360s.",info
+16,weather_change,Light rain started. Demand is slightly higher and road capacity is reduced.,info
+18,weather_change,Weather returned to clear conditions.,info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 20, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 15, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 11, time since service: 360s.",info
+18,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 11, time since service: 360s.",info
+21,weather_change,Light rain started. Demand is slightly higher and road capacity is reduced.,info
+24,weather_change,Weather returned to clear conditions.,info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 0. Reason: max time since service exceeded. Queue: 6, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 1. Reason: max time since service exceeded. Queue: 11, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 2. Reason: max time since service exceeded. Queue: 7, time since service: 360s.",info
+24,pedestrian_phase,"Pedestrian phase activated at intersection 3. Reason: max time since service exceeded. Queue: 15, time since service: 360s.",info
